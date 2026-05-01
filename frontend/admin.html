@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin – Cinema Pulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-shell">
+        <!-- Sidebar -->
+        <nav class="admin-nav">
+            <div class="admin-brand">
+                <span class="brand-mark">CP</span>
+                <span>Admin</span>
+            </div>
+            <ul class="admin-menu">
+                <li><button class="menu-btn active" data-tab="dashboard">Dashboard</button></li>
+                <li><button class="menu-btn" data-tab="movies">Quản lý phim</button></li>
+                <li><button class="menu-btn" data-tab="showtimes">Suất chiếu</button></li>
+                <li><button class="menu-btn" data-tab="users">Người dùng</button></li>
+                <li><button class="menu-btn" data-tab="revenue">Doanh thu</button></li>
+                <li><button class="menu-btn" data-tab="coupons">Mã giảm giá</button></li>
+            </ul>
+            <a href="index.html" class="admin-back">← Trang chủ</a>
+        </nav>
+
+        <!-- Main -->
+        <main class="admin-main">
+            <div class="admin-topbar">
+                <h1 id="tab-title">Dashboard</h1>
+                <span id="admin-user-label" class="admin-user-label"></span>
+            </div>
+            <div id="admin-msg" class="admin-msg" hidden></div>
+
+            <!-- ── DASHBOARD ── -->
+            <section id="tab-dashboard" class="tab-content active">
+                <div class="stat-grid">
+                    <div class="stat-card"><span class="stat-label">Doanh thu tháng này</span><strong id="stat-today-rev">–</strong></div>
+                    <div class="stat-card"><span class="stat-label">Vé bán tháng này</span><strong id="stat-today-tickets">–</strong></div>
+                    <div class="stat-card"><span class="stat-label">Phim đang chiếu</span><strong id="stat-movies">–</strong></div>
+                    <div class="stat-card"><span class="stat-label">Suất chiếu sắp tới</span><strong id="stat-showtimes">–</strong></div>
+                </div>
+                <div class="dashboard-grid">
+                    <section class="dashboard-panel">
+                        <div class="panel-head">
+                            <div>
+                                <span class="stat-label">Vận hành</span>
+                                <h2>Suất chiếu gần nhất</h2>
+                            </div>
+                            <button class="button button-secondary dashboard-jump" data-tab-jump="showtimes">Quản lý</button>
+                        </div>
+                        <div id="dashboard-showtimes" class="compact-list"></div>
+                    </section>
+                    <section class="dashboard-panel">
+                        <div class="panel-head">
+                            <div>
+                                <span class="stat-label">Doanh thu</span>
+                                <h2>Phim bán tốt</h2>
+                            </div>
+                            <button class="button button-secondary dashboard-jump" data-tab-jump="revenue">Chi tiết</button>
+                        </div>
+                        <div id="dashboard-top-movies" class="compact-list"></div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- ── MOVIES ── -->
+            <section id="tab-movies" class="tab-content">
+                <div class="tab-toolbar">
+                    <button class="button button-primary" id="add-movie-btn">+ Thêm phim</button>
+                </div>
+
+                <div id="movie-form-wrap" class="form-card" hidden>
+                    <h3 id="movie-form-title">Thêm phim mới</h3>
+                    <form id="movie-form" class="admin-form">
+                        <input type="hidden" id="movie-id-field">
+                        <div class="form-row">
+                            <label class="form-field">Tên phim *<input name="title" required placeholder="Tên phim"></label>
+                            <label class="form-field">Thời lượng (phút)<input name="duration" type="number" min="1" placeholder="120"></label>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-field">Thể loại (dấu phẩy)<input name="genre" placeholder="Hành động, Phiêu lưu"></label>
+                            <label class="form-field">Ngày khởi chiếu<input name="release_date" type="date"></label>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-field">Trạng thái
+                                <select name="status">
+                                    <option value="Đang chiếu">Đang chiếu</option>
+                                    <option value="Sắp chiếu">Sắp chiếu</option>
+                                </select>
+                            </label>
+                            <label class="form-field">URL ảnh bìa<input name="poster_url" placeholder="https://..."></label>
+                        </div>
+                        <label class="form-field">Mô tả<textarea name="description" rows="3" placeholder="Nội dung phim..."></textarea></label>
+                        <div class="form-actions">
+                            <button type="submit" class="button button-primary" id="movie-submit-btn">Lưu</button>
+                            <button type="button" class="button button-secondary" id="movie-cancel-btn">Huỷ</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="movie-table-wrap" class="table-wrap">
+                    <table class="admin-table" id="movie-table">
+                        <thead><tr><th>Tên phim</th><th>Thể loại</th><th>Thời lượng</th><th>Trạng thái</th><th>Ngày chiếu</th><th></th></tr></thead>
+                        <tbody id="movie-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ── SHOWTIMES ── -->
+            <section id="tab-showtimes" class="tab-content">
+                <div class="tab-toolbar">
+                    <button class="button button-primary" id="add-showtime-btn">+ Thêm suất chiếu</button>
+                </div>
+
+                <div id="showtime-form-wrap" class="form-card" hidden>
+                    <h3>Thêm suất chiếu mới</h3>
+                    <form id="showtime-form" class="admin-form">
+                        <div class="form-row">
+                            <label class="form-field">Phim *
+                                <select name="movieId" id="st-movie-select" required><option value="">– Chọn phim –</option></select>
+                            </label>
+                            <label class="form-field">Phòng chiếu *
+                                <select name="roomName" id="st-room-select" required><option value="">– Chọn phòng –</option></select>
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-field">Bắt đầu *<input name="startTime" type="datetime-local" required></label>
+                            <label class="form-field">Kết thúc *<input name="endTime" type="datetime-local" required></label>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="button button-primary">Tạo suất chiếu</button>
+                            <button type="button" class="button button-secondary" id="showtime-cancel-btn">Huỷ</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>Phim</th><th>Phòng</th><th>Bắt đầu</th><th>Kết thúc</th><th>Ghế đặt/Tổng</th><th></th></tr></thead>
+                        <tbody id="showtime-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ── USERS ── -->
+            <section id="tab-users" class="tab-content">
+                <div class="tab-toolbar">
+                    <input id="user-search" type="search" placeholder="Tìm theo tên, email..." class="admin-search">
+                    <select id="user-role-filter" class="admin-select">
+                        <option value="">Tất cả vai trò</option>
+                        <option value="CUSTOMER">Khách hàng</option>
+                        <option value="STAFF">Nhân viên</option>
+                        <option value="MANAGER">Quản lý</option>
+                    </select>
+                </div>
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>Họ tên</th><th>Email</th><th>SĐT</th><th>Vai trò</th><th>Điểm</th><th></th></tr></thead>
+                        <tbody id="user-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ── REVENUE ── -->
+            <section id="tab-revenue" class="tab-content">
+                <div class="tab-toolbar">
+                    <label class="form-field">Năm
+                        <input id="rev-year" type="number" value="2025" min="2020" max="2099" style="width:120px">
+                    </label>
+                    <button class="button button-primary" id="rev-load-btn">Xem</button>
+                </div>
+                <div class="stat-grid" id="rev-summary"></div>
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>Tháng</th><th>Doanh thu</th><th>Số vé</th><th>Tỷ lệ</th></tr></thead>
+                        <tbody id="rev-tbody"></tbody>
+                    </table>
+                </div>
+                <h3 style="margin-top:32px">Doanh thu theo phim</h3>
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>Phim</th><th>Doanh thu</th><th>Số vé</th><th>Số hoá đơn</th></tr></thead>
+                        <tbody id="rev-movie-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ── COUPONS ── -->
+            <section id="tab-coupons" class="tab-content">
+                <div class="tab-toolbar">
+                    <button class="button button-primary" id="add-coupon-btn">+ Tạo mã giảm giá</button>
+                </div>
+
+                <div id="coupon-form-wrap" class="form-card" hidden>
+                    <h3>Tạo mã giảm giá</h3>
+                    <form id="coupon-form" class="admin-form">
+                        <div class="form-row">
+                            <label class="form-field">Mã coupon *<input name="code" required placeholder="SUMMER20"></label>
+                            <label class="form-field">Loại giảm giá *
+                                <select name="discount_type">
+                                    <option value="PERCENT">Phần trăm (%)</option>
+                                    <option value="FIXED">Số tiền cố định</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-field">Giá trị giảm *<input name="discount_value" type="number" min="1" required placeholder="20"></label>
+                            <label class="form-field">Đơn tối thiểu (VNĐ)<input name="min_order_value" type="number" min="0" placeholder="0"></label>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-field">Số lần dùng tối đa *<input name="max_uses" type="number" min="1" required placeholder="100"></label>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-field">Ngày bắt đầu *<input name="start_date" type="date" required></label>
+                            <label class="form-field">Ngày hết hạn *<input name="end_date" type="date" required></label>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="button button-primary">Tạo</button>
+                            <button type="button" class="button button-secondary" id="coupon-cancel-btn">Huỷ</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>Mã</th><th>Loại</th><th>Giá trị</th><th>Đã dùng/Tổng</th><th>Hết hạn</th><th>Trạng thái</th><th></th></tr></thead>
+                        <tbody id="coupon-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

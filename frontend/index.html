@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinema Pulse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <a class="brand" href="index.html" aria-label="Cinema Pulse home">
+                <span class="brand-mark">CP</span>
+                <span class="brand-text">
+                    <strong>Cinema Pulse</strong>
+                    <small>Đặt vé nhanh, xem phim gọn</small>
+                </span>
+            </a>
+            <nav class="topbar-nav" aria-label="Điều hướng chính">
+                <a href="#movies">Phim</a>
+                <a href="#showtimes">Suất chiếu</a>
+                <a href="#features">Tính năng</a>
+            </nav>
+            <div id="auth-nav" class="topbar-auth"></div>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div class="hero-copy">
+                    <span class="eyebrow">Movie booking experience</span>
+                    <h1>Trải nghiệm đặt vé phim nhanh, rõ và tập trung vào nội dung.</h1>
+                    <p>Tìm phim đang chiếu, lọc theo thể loại, xem ghế trống và chọn suất chiếu chỉ trong vài thao tác.</p>
+                    <div class="hero-actions">
+                        <a class="button button-primary" href="#movies">Khám phá phim</a>
+                        <a class="button button-secondary" href="#features">Xem tính năng</a>
+                    </div>
+                    <div class="hero-metrics" aria-label="Thống kê nhanh">
+                        <article><strong id="movie-count">0</strong><span>Phim đang hiển thị</span></article>
+                        <article><strong>24/7</strong><span>Tra cứu lịch chiếu</span></article>
+                        <article><strong>1 chạm</strong><span>Xem ghế trống</span></article>
+                    </div>
+                </div>
+                <div class="hero-panel" aria-hidden="true">
+                    <div class="poster-card poster-card-large">
+                        <div class="poster-gradient"></div>
+                        <span class="poster-chip">Now showing</span>
+                        <div class="poster-info">
+                            <strong>Suất chiếu nổi bật</strong>
+                            <span>Chọn phim, chọn ghế, đặt vé</span>
+                        </div>
+                    </div>
+                    <div class="poster-stack">
+                        <div class="poster-card poster-card-small poster-a"></div>
+                        <div class="poster-card poster-card-small poster-b"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="toolbar" id="showtimes">
+                <div>
+                    <span class="section-label">Khám phá</span>
+                    <h2>Danh sách phim</h2>
+                </div>
+                <div class="toolbar-filters">
+                    <label class="field">
+                        <span>Tìm kiếm</span>
+                        <input id="search-input" type="search" placeholder="Tên phim, thể loại...">
+                    </label>
+                    <label class="field">
+                        <span>Thể loại</span>
+                        <select id="genre-filter"><option value="all">Tất cả</option></select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="status-box" id="status-box" hidden></section>
+            <section id="movies" class="movie-grid" aria-live="polite"></section>
+
+            <!-- Reviews panel (shown when user clicks a movie) -->
+            <section id="review-section" class="review-section" hidden>
+                <div class="review-header">
+                    <h3 id="review-movie-title">Đánh giá phim</h3>
+                    <button class="button button-secondary review-close-btn" id="close-review-btn">Đóng</button>
+                </div>
+                <div id="review-avg" class="review-avg"></div>
+                <div id="review-list" class="review-list"></div>
+                <div id="review-form-wrap" class="review-form-wrap"></div>
+            </section>
+
+            <section id="features" class="feature-grid">
+                <article class="feature-card">
+                    <h3>Tìm kiếm thông minh</h3>
+                    <p>Tìm nhanh phim theo tên hoặc thể loại, hỗ trợ phân trang khi danh sách lớn.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Ghế trống rõ ràng</h3>
+                    <p>Hiển thị sơ đồ ghế và trạng thái ghế để người dùng chọn nhanh, giảm nhầm lẫn.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Đặt vé liền mạch</h3>
+                    <p>Thiết kế luồng chọn ghế và thanh toán theo giao dịch để hạn chế tranh chấp dữ liệu.</p>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

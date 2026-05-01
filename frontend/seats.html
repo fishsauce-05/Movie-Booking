@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chọn ghế – Cinema Pulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/seats.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <a class="brand" href="index.html">
+                <span class="brand-mark">CP</span>
+                <span class="brand-text">
+                    <strong>Cinema Pulse</strong>
+                    <small>Đặt vé nhanh, xem phim gọn</small>
+                </span>
+            </a>
+            <nav class="topbar-nav">
+                <a href="index.html">← Về trang chủ</a>
+            </nav>
+            <div id="auth-nav" class="topbar-auth"></div>
+        </header>
+
+        <main class="seats-layout">
+            <!-- Left: movie info + showtime picker + seat map -->
+            <div class="seats-main">
+                <div id="movie-info" class="movie-info-bar">
+                    <div class="movie-info-skeleton">Đang tải thông tin phim...</div>
+                </div>
+
+                <section class="showtime-picker-section" id="showtime-picker-section">
+                    <h3>Chọn suất chiếu</h3>
+                    <div id="showtime-list" class="showtime-list"></div>
+                </section>
+
+                <section class="seat-section" id="seat-section" hidden>
+                    <div class="screen-label">MÀN HÌNH</div>
+                    <div class="screen-bar"></div>
+
+                    <div class="seat-legend">
+                        <span class="legend-item"><span class="legend-dot seat-empty"></span>Trống</span>
+                        <span class="legend-item"><span class="legend-dot seat-selected"></span>Đã chọn</span>
+                        <span class="legend-item"><span class="legend-dot seat-booked"></span>Đã đặt</span>
+                        <span class="legend-item"><span class="legend-dot seat-vip"></span>VIP</span>
+                    </div>
+
+                    <div id="seat-grid" class="seat-grid"></div>
+                </section>
+            </div>
+
+            <!-- Right: booking summary -->
+            <aside class="booking-sidebar" id="booking-sidebar">
+                <h3>Thông tin đặt vé</h3>
+
+                <div class="sidebar-block">
+                    <span class="sidebar-label">Phim</span>
+                    <span id="sb-movie" class="sidebar-value">–</span>
+                </div>
+                <div class="sidebar-block">
+                    <span class="sidebar-label">Suất chiếu</span>
+                    <span id="sb-showtime" class="sidebar-value">–</span>
+                </div>
+                <div class="sidebar-block">
+                    <span class="sidebar-label">Phòng</span>
+                    <span id="sb-room" class="sidebar-value">–</span>
+                </div>
+                <div class="sidebar-block">
+                    <span class="sidebar-label">Ghế đã chọn</span>
+                    <span id="sb-seats" class="sidebar-value muted">Chưa chọn ghế</span>
+                </div>
+
+                <div class="sidebar-block">
+                    <span class="sidebar-label">Giá gốc</span>
+                    <span id="sb-base-price" class="sidebar-value">0 VNĐ</span>
+                </div>
+
+                <div class="coupon-row">
+                    <input id="coupon-input" type="text" placeholder="Nhập mã giảm giá..." class="coupon-field">
+                    <button id="coupon-btn" class="button button-secondary coupon-apply-btn">Áp dụng</button>
+                </div>
+                <div id="coupon-msg" class="coupon-msg"></div>
+
+                <div class="sidebar-block sidebar-total">
+                    <span class="sidebar-label">Tổng thanh toán</span>
+                    <span id="sb-total" class="sidebar-total-value">0 VNĐ</span>
+                </div>
+
+                <button id="book-btn" class="button button-primary book-btn" disabled>Đặt vé</button>
+                <p id="book-msg" class="book-msg"></p>
+            </aside>
+        </main>
+
+        <!-- Login required modal -->
+        <div id="login-required-modal" class="modal-overlay" hidden>
+            <div class="modal-box">
+                <h3>Yêu cầu đăng nhập</h3>
+                <p>Vui lòng đăng nhập để đặt vé.</p>
+                <div style="display:flex;gap:12px;justify-content:flex-end">
+                    <button class="button button-secondary" onclick="document.getElementById('login-required-modal').hidden=true">Đóng</button>
+                    <button class="button button-primary" onclick="document.getElementById('login-required-modal').hidden=true;openModal('login-modal')">Đăng nhập</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/seats.js"></script>
+</body>
+</html>
