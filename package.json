@@ -1,0 +1,21 @@
+{
+	"name": "movie-booking",
+	"version": "1.0.0",
+	"description": "Movie booking platform with MongoDB and Express",
+	"main": "backend/server.js",
+	"type": "module",
+	"scripts": {
+		"start": "node backend/server.js",
+		"dev": "nodemon backend/server.js",
+		"sync:auth": "node sync-auth-data.js"
+	},
+	"dependencies": {
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.21.2",
+		"mongodb": "^6.10.0"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.7"
+	}
+}
