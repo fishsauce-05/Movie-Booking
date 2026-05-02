@@ -12,8 +12,8 @@ import createAdminRoutes from './routes/adminRoutes.js';
 import createAuthRoutes from './routes/authRoutes.js';
 import createReviewRoutes from './routes/reviewRoutes.js';
 import createCouponRoutes from './routes/couponRoutes.js';
-import { startLoyaltyPointListener } from './services/loyaltyService.js';
-import { upsertDefaultUsers } from './services/defaultUsersService.js';
+import { startLoyaltyPointListener } from '../database/changeStreams/loyaltyStream.js';
+import { insertUsers } from '../database/seed/users.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -26,10 +26,10 @@ app.use(express.static(join(__dirname, '..', 'frontend')));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
-async function bootstrap() {
+async function run() {
     const db = await connectToDatabase();
 
-    await upsertDefaultUsers(db);
+    await insertUsers(db);
 
     app.use('/api/movies', createMovieRoutes(db));
     app.use('/api/showtimes', createShowtimeRoutes(db));
@@ -51,7 +51,7 @@ async function bootstrap() {
     });
 }
 
-bootstrap().catch(async (error) => {
+run().catch(async (error) => {
     console.error('Không thể khởi động server:', error);
     try { await client.close(); } catch {}
     process.exit(1);

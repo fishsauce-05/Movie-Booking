@@ -106,3 +106,6 @@ Thumbs.db
 
 package-lock.json
 package.json
+
+.claude/
+.claude

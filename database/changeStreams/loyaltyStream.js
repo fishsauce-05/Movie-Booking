@@ -60,4 +60,4 @@ function startLoyaltyPointListener(db) {
     });
 }
 
-module.exports = { startLoyaltyPointListener };
+export { startLoyaltyPointListener };
