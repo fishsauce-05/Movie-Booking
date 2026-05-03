@@ -7,7 +7,9 @@
 	"scripts": {
 		"start": "node backend/server.js",
 		"dev": "nodemon backend/server.js",
-		"sync:auth": "node sync-auth-data.js"
+		"sync:auth": "node sync-auth-data.js",
+		"db:indexes": "node database/indexes/applyIndexes.js",
+		"db:seed": "node database/seed/index.js"
 	},
 	"dependencies": {
 		"cors": "^2.8.5",

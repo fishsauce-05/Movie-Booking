@@ -7,6 +7,7 @@ import { insertRooms } from './rooms.js';
 import { insertUsers } from './users.js';
 import { insertCoupons } from './coupons.js';
 import { insertShowtimes } from './showtimes.js';
+import { createIndexes } from '../indexes/createIndexes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: join(__dirname, '../../.env') });
@@ -22,6 +23,7 @@ async function seedAll() {
         await insertUsers(db);
         await insertCoupons(db);
         await insertShowtimes(db, movieIds);
+        await createIndexes(db);
 
         console.log('\n✓ Seed toàn bộ dữ liệu thành công!');
     } catch (err) {
