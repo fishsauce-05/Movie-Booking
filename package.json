@@ -1,7 +1,7 @@
 {
 	"name": "movie-booking",
 	"version": "1.0.0",
-	"description": "Movie booking platform with MongoDB and Express",
+	"description": "Movie booking platform with MongoDB as database",
 	"main": "backend/server.js",
 	"type": "module",
 	"scripts": {
