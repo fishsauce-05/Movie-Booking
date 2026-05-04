@@ -14,6 +14,7 @@ import createReviewRoutes from './routes/reviewRoutes.js';
 import createCouponRoutes from './routes/couponRoutes.js';
 import { startLoyaltyPointListener } from '../database/changeStreams/loyaltyStream.js';
 import { insertUsers } from '../database/seed/users.js';
+import { createIndexes } from '../database/indexes/createIndexes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -29,6 +30,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 async function run() {
     const db = await connectToDatabase();
 
+    await createIndexes(db);
     await insertUsers(db);
 
     app.use('/api/movies', createMovieRoutes(db));

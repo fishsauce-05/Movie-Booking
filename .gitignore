@@ -104,7 +104,7 @@ dist/
 .DS_Store
 Thumbs.db
 
-# package.json và package-lock.json KHÔNG được ignore
+.understand-*/
 
 .claude/
 .claude
