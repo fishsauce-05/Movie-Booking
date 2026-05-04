@@ -17,7 +17,7 @@ export default function createAdminRoutes(db) {
 
     // ── MOVIES ──────────────────────────────────────────────────────────────
 
-    router.get('/movies', requireRole('MANAGER', 'STAFF'), async (req, res, next) => {
+    router.get('/movies', requireRole('MANAGER'), async (req, res, next) => {
         try {
             const movies = await getAllMovies(db);
             res.json(movies);
