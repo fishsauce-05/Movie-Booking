@@ -322,8 +322,8 @@
 }
 
 .sidebar-total {
-    padding-top: 16px !important;
-    padding-bottom: 16px !important;
+    padding-top: 16px;
+    padding-bottom: 16px;
     border-top: 2px solid var(--accent);
     border-bottom: 2px solid var(--accent);
     background: rgba(255, 179, 71, 0.05);

@@ -75,8 +75,8 @@
 
                 <div id="movie-form-wrap" class="form-card" hidden>
                     <h3 id="movie-form-title">Thêm phim mới</h3>
-                    <form id="movie-form" class="admin-form">
-                        <input type="hidden" id="movie-id-field">
+                    <form id="movie-form" class="admin-form" method="post" action="#">
+                        <input type="hidden" id="movie-id-field" name="id">
                         <div class="form-row">
                             <label class="form-field">Tên phim *<input name="title" required placeholder="Tên phim"></label>
                             <label class="form-field">Thời lượng (phút)<input name="duration" type="number" min="1" placeholder="120"></label>
@@ -118,7 +118,7 @@
 
                 <div id="showtime-form-wrap" class="form-card" hidden>
                     <h3>Thêm suất chiếu mới</h3>
-                    <form id="showtime-form" class="admin-form">
+                    <form id="showtime-form" class="admin-form" method="post" action="#">
                         <div class="form-row">
                             <label class="form-field">Phim *
                                 <select name="movieId" id="st-movie-select" required><option value="">– Chọn phim –</option></select>
@@ -198,7 +198,7 @@
 
                 <div id="coupon-form-wrap" class="form-card" hidden>
                     <h3>Tạo mã giảm giá</h3>
-                    <form id="coupon-form" class="admin-form">
+                    <form id="coupon-form" class="admin-form" method="post" action="#">
                         <div class="form-row">
                             <label class="form-field">Mã coupon *<input name="code" required placeholder="SUMMER20"></label>
                             <label class="form-field">Loại giảm giá *

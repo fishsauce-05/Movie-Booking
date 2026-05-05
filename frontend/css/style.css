@@ -349,6 +349,13 @@ textarea {
 	outline: none;
 }
 
+/* Date/calendar picker icon color for dark theme */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+	filter: invert(1) brightness(1.15);
+	opacity: 0.95;
+}
+
 .field input::placeholder {
 	color: #8293ac;
 }
