@@ -147,6 +147,12 @@ textarea {
 .button-secondary {
 	border: 1px solid var(--line);
 	background: rgba(255, 255, 255, 0.03);
+	color: var(--text); /* Thêm dòng này để chữ hiển thị màu sáng */
+}
+
+.button-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .hero {
