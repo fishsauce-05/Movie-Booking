@@ -150,7 +150,7 @@
             <section id="tab-users" class="tab-content">
                 <div class="tab-toolbar">
                     <input id="user-search" type="search" placeholder="Tìm theo tên, email..." class="admin-search">
-                    <select id="user-role-filter" class="admin-select">
+                    <select id="user-role-filter" class="admin-select" aria-label="Lọc theo vai trò"></select>
                         <option value="">Tất cả vai trò</option>
                         <option value="CUSTOMER">Khách hàng</option>
                         <option value="STAFF">Nhân viên</option>
@@ -169,7 +169,7 @@
             <section id="tab-revenue" class="tab-content">
                 <div class="tab-toolbar">
                     <label class="form-field">Năm
-                        <input id="rev-year" type="number" value="2025" min="2020" max="2099" style="width:120px">
+                        <input id="rev-year" type="number" value="2025" min="2020" max="2099">
                     </label>
                     <button class="button button-primary" id="rev-load-btn">Xem</button>
                 </div>
@@ -180,7 +180,7 @@
                         <tbody id="rev-tbody"></tbody>
                     </table>
                 </div>
-                <h3 style="margin-top:32px">Doanh thu theo phim</h3>
+                <h3 class="mt-32">Doanh thu theo phim</h3>
                 <div class="table-wrap">
                     <table class="admin-table">
                         <thead><tr><th>Phim</th><th>Doanh thu</th><th>Số vé</th><th>Số hoá đơn</th></tr></thead>

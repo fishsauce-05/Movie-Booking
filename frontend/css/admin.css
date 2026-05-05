@@ -589,3 +589,7 @@
         width: 100%;
     }
 }
+
+#rev-year { width: 120px; }
+
+.mt-32 { margin-top: 32px; }

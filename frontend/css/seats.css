@@ -494,3 +494,9 @@
         font-size: 12px;
     }
 }
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
