@@ -17,12 +17,12 @@
                 <span>Admin</span>
             </div>
             <ul class="admin-menu">
-                <li><button class="menu-btn active" data-tab="dashboard">Dashboard</button></li>
-                <li><button class="menu-btn" data-tab="movies">Quản lý phim</button></li>
-                <li><button class="menu-btn" data-tab="showtimes">Suất chiếu</button></li>
-                <li><button class="menu-btn" data-tab="users">Người dùng</button></li>
-                <li><button class="menu-btn" data-tab="revenue">Doanh thu</button></li>
-                <li><button class="menu-btn" data-tab="coupons">Mã giảm giá</button></li>
+                <li><button type="button" class="menu-btn active" data-tab="dashboard">Dashboard</button></li>
+                <li><button type="button" class="menu-btn" data-tab="movies">Quản lý phim</button></li>
+                <li><button type="button" class="menu-btn" data-tab="showtimes">Suất chiếu</button></li>
+                <li><button type="button" class="menu-btn" data-tab="users">Người dùng</button></li>
+                <li><button type="button" class="menu-btn" data-tab="revenue">Doanh thu</button></li>
+                <li><button type="button" class="menu-btn" data-tab="coupons">Mã giảm giá</button></li>
             </ul>
             <a href="index.html" class="admin-back">← Trang chủ</a>
         </nav>
@@ -50,7 +50,7 @@
                                 <span class="stat-label">Vận hành</span>
                                 <h2>Suất chiếu gần nhất</h2>
                             </div>
-                            <button class="button button-secondary dashboard-jump" data-tab-jump="showtimes">Quản lý</button>
+                                <button type="button" class="button button-secondary dashboard-jump" data-tab-jump="showtimes">Quản lý</button>
                         </div>
                         <div id="dashboard-showtimes" class="compact-list"></div>
                     </section>
@@ -60,7 +60,7 @@
                                 <span class="stat-label">Doanh thu</span>
                                 <h2>Phim bán tốt</h2>
                             </div>
-                            <button class="button button-secondary dashboard-jump" data-tab-jump="revenue">Chi tiết</button>
+                            <button type="button" class="button button-secondary dashboard-jump" data-tab-jump="revenue">Chi tiết</button>
                         </div>
                         <div id="dashboard-top-movies" class="compact-list"></div>
                     </section>
@@ -70,7 +70,7 @@
             <!-- ── MOVIES ── -->
             <section id="tab-movies" class="tab-content">
                 <div class="tab-toolbar">
-                    <button class="button button-primary" id="add-movie-btn">+ Thêm phim</button>
+                    <button type="button" class="button button-primary" id="add-movie-btn">+ Thêm phim</button>
                 </div>
 
                 <div id="movie-form-wrap" class="form-card" hidden>
@@ -113,7 +113,7 @@
             <!-- ── SHOWTIMES ── -->
             <section id="tab-showtimes" class="tab-content">
                 <div class="tab-toolbar">
-                    <button class="button button-primary" id="add-showtime-btn">+ Thêm suất chiếu</button>
+                    <button type="button" class="button button-primary" id="add-showtime-btn">+ Thêm suất chiếu</button>
                 </div>
 
                 <div id="showtime-form-wrap" class="form-card" hidden>
@@ -150,7 +150,8 @@
             <section id="tab-users" class="tab-content">
                 <div class="tab-toolbar">
                     <input id="user-search" type="search" placeholder="Tìm theo tên, email..." class="admin-search">
-                    <select id="user-role-filter" class="admin-select" aria-label="Lọc theo vai trò">
+                    <label for="user-role-filter" class="sr-only">Lọc theo vai trò</label>
+                    <select id="user-role-filter" class="admin-select">
                         <option value="">Tất cả vai trò</option>
                         <option value="CUSTOMER">Khách hàng</option>
                         <option value="STAFF">Nhân viên</option>
@@ -171,7 +172,7 @@
                     <label class="form-field">Năm
                         <input id="rev-year" type="number" value="2025" min="2020" max="2099">
                     </label>
-                    <button class="button button-primary" id="rev-load-btn">Xem</button>
+                    <button type="button" class="button button-primary" id="rev-load-btn">Xem</button>
                 </div>
                 <div class="stat-grid" id="rev-summary"></div>
                 <div class="table-wrap">
@@ -192,7 +193,7 @@
             <!-- ── COUPONS ── -->
             <section id="tab-coupons" class="tab-content">
                 <div class="tab-toolbar">
-                    <button class="button button-primary" id="add-coupon-btn">+ Tạo mã giảm giá</button>
+                    <button type="button" class="button button-primary" id="add-coupon-btn">+ Tạo mã giảm giá</button>
                 </div>
 
                 <div id="coupon-form-wrap" class="form-card" hidden>

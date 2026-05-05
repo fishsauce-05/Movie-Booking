@@ -79,7 +79,7 @@
 
                 <div class="coupon-row">
                     <input id="coupon-input" type="text" placeholder="Nhập mã giảm giá..." class="coupon-field">
-                    <button id="coupon-btn" class="button button-secondary coupon-apply-btn">Áp dụng</button>
+                    <button type="button" id="coupon-btn" class="button button-secondary coupon-apply-btn">Áp dụng</button>
                 </div>
                 <div id="coupon-msg" class="coupon-msg"></div>
 
@@ -88,7 +88,7 @@
                     <span id="sb-total" class="sidebar-total-value">0 VNĐ</span>
                 </div>
 
-                <button id="book-btn" class="button button-primary book-btn" disabled>Đặt vé</button>
+                <button type="button" id="book-btn" class="button button-primary book-btn" disabled>Đặt vé</button>
                 <p id="book-msg" class="book-msg"></p>
             </aside>
         </main>
@@ -99,8 +99,8 @@
                 <h3>Yêu cầu đăng nhập</h3>
                 <p>Vui lòng đăng nhập để đặt vé.</p>
                 <div class="modal-actions">
-                    <button class="button button-secondary" onclick="document.getElementById('login-required-modal').hidden=true">Đóng</button>
-                    <button class="button button-primary" onclick="document.getElementById('login-required-modal').hidden=true;openModal('login-modal')">Đăng nhập</button>
+                    <button type="button" class="button button-secondary" onclick="document.getElementById('login-required-modal').hidden=true">Đóng</button>
+                    <button type="button" class="button button-primary" onclick="document.getElementById('login-required-modal').hidden=true;openModal('login-modal')">Đăng nhập</button>
                 </div>
             </div>
         </div>
@@ -123,7 +123,7 @@
                     <span id="bs-total" class="sidebar-value">0 VNĐ</span>
                 </div>
                 <div class="modal-actions">
-                    <button class="button button-secondary" onclick="document.getElementById('booking-success-modal').hidden=true">Đóng</button>
+                    <button type="button" class="button button-secondary" onclick="document.getElementById('booking-success-modal').hidden=true">Đóng</button>
                 </div>
             </div>
         </div>
