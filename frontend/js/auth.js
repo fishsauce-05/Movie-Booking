@@ -86,6 +86,7 @@ function openCancelConfirm(bookingId, user) {
 async function confirmCancelBooking() {
     const modal = document.getElementById('cancel-confirm-modal');
     const bookingId = modal.dataset.bookingId;
+    const userId = modal.dataset.userId;
     const btn = document.getElementById('cancel-confirm-btn');
     btn.disabled = true;
     btn.textContent = 'Đang hủy...';
@@ -100,6 +101,17 @@ async function confirmCancelBooking() {
         if (!res.ok) {
             alert(data.message || 'Hủy vé thất bại.');
             return;
+        }
+        try {
+            const updatedUser = await fetch(`/api/auth/${userId}`, {
+                headers: getAuthHeaders()
+            }).then((r) => r.json());
+            if (updatedUser && updatedUser._id) {
+                saveUser(updatedUser);
+                renderAuthNav(updatedUser);
+            }
+        } catch {
+            // Keep the current UI if the profile refresh fails.
         }
         const item = document.getElementById(`bh-item-${bookingId}`);
         if (item) {

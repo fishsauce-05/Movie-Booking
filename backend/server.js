@@ -13,6 +13,7 @@ import createAuthRoutes from './routes/authRoutes.js';
 import createReviewRoutes from './routes/reviewRoutes.js';
 import createCouponRoutes from './routes/couponRoutes.js';
 import { startLoyaltyPointListener } from '../database/changeStreams/loyaltyStream.js';
+import { startBookingCancellationListener } from '../database/changeStreams/bookingCancellationStream.js';
 import { insertUsers } from '../database/seed/users.js';
 import { createIndexes } from '../database/indexes/createIndexes.js';
 
@@ -42,7 +43,8 @@ async function run() {
     app.use('/api/coupons', createCouponRoutes(db));
 
     startLoyaltyPointListener(db);
-
+    startBookingCancellationListener(db);
+    
     app.use((err, req, res, next) => {
         console.error(err);
         res.status(500).json({ message: err.message || 'Internal Server Error' });

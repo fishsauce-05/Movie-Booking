@@ -60,7 +60,7 @@ export default function createBookingRoutes(db) {
 
             await db.collection('Bookings').updateOne(
                 { _id: new ObjectId(bookingId) },
-                { $set: { status: 'Đã hủy', updated_at: new Date() } }
+                { $set: { status: 'Đã hủy', updated_at: new Date(), cancelled_at: new Date() } }
             );
 
             await db.collection('Showtimes').updateOne(

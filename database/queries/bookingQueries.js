@@ -33,7 +33,13 @@ async function getBookingsByCustomerWithDetails(db, customerId) {
                 as: 'showtime'
             }
         },
-        { $addFields: { showtime: { $first: '$showtime' } } },
+        {
+            $addFields: {
+                showtime: {
+                    $ifNull: ['$showtime_snapshot', { $first: '$showtime' }]
+                }
+            }
+        },
         { $sort:      { created_at: -1 } }
     ]).toArray();
 }
@@ -42,6 +48,7 @@ async function getBookingsByCustomerWithDetails(db, customerId) {
 async function getBookingsByShowtime(db, showtimeId) {
     return db.collection('Bookings')
         .find({ showtime_id: new ObjectId(showtimeId) })
+    .sort({ created_at: -1 })
         .toArray();
 }
 

@@ -1,6 +1,8 @@
 async function createIndexes(db) {
     console.log('Đang tạo chỉ mục...');
 
+    await db.createCollection('Bookings').catch(() => {});
+
     // Users
     await db.collection('Users').createIndex({ email: 1 }, { unique: true, name: 'users_email_unique' });
     await db.collection('Users').createIndex({ phone: 1 }, { unique: true, name: 'users_phone_unique' });
