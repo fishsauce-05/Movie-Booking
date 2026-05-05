@@ -91,7 +91,7 @@ function renderAuthNav(user) {
     } else {
         el.innerHTML = `
             <div class="auth-info">
-                <button class="button button-secondary auth-btn" id="open-login-btn">Đăng nhập</button>
+                <button class="button button-primary auth-btn" id="open-login-btn">Đăng nhập</button>
                 <button class="button button-primary auth-btn" id="open-register-btn">Đăng ký</button>
             </div>
         `;

@@ -22,23 +22,24 @@ npm install
 
 ## 2. Cấu hình biến môi trường
 
-Sao chép file mẫu rồi điền thông tin kết nối:
+Sao chép file mẫu:
 
 ```bash
+# Windows
+copy .env.example .env
+
+# macOS / Linux
 cp .env.example .env
 ```
 
-Mở `.env` và chỉnh sửa:
+Mở `.env` và chỉnh sửa theo nhu cầu:
 
 ```env
-# === Dùng MongoDB Atlas (khuyến nghị) ===
-MONGODB_URI=mongodb+srv://<USERNAME>:<PASSWORD>@<CLUSTER>/<DATABASE>?retryWrites=true&w=majority
-
-# === Hoặc dùng MongoDB local ===
-# MONGODB_URI=mongodb://127.0.0.1:27017/db_movie_booking
-
 MONGODB_DB=db_movie_booking
 PORT=3000
+
+# Thêm dòng này nếu dùng MongoDB Atlas:
+MONGODB_URI=mongodb+srv://<USERNAME>:<PASSWORD>@<CLUSTER_NAME>/<DATABASE_NAME>?retryWrites=true&w=majority
 ```
 
 ### Dùng MongoDB Atlas
@@ -46,7 +47,7 @@ PORT=3000
 1. Đăng nhập [MongoDB Atlas](https://cloud.mongodb.com), tạo cluster miễn phí (M0).
 2. Vào **Database Access** → tạo user với quyền `readWrite`.
 3. Vào **Network Access** → thêm IP của bạn (hoặc `0.0.0.0/0` để cho phép mọi IP).
-4. Vào cluster → **Connect** → **Drivers** → sao chép chuỗi kết nối dán vào `MONGODB_URI`.
+4. Vào cluster → **Connect** → **Drivers** → sao chép chuỗi kết nối dán vào `MONGODB_URI` trong file `.env`.
 
 ### Dùng MongoDB local
 
@@ -57,25 +58,35 @@ PORT=3000
 net start MongoDB
 ```
 
-Khi dùng local, không cần thay `MONGODB_URI` — giá trị mặc định `mongodb://127.0.0.1:27017` sẽ được dùng.
+Khi dùng local, bỏ qua hoặc xóa dòng `MONGODB_URI` trong `.env` — ứng dụng sẽ tự kết nối tới `mongodb://127.0.0.1:27017`.
 
 > **Lưu ý:** Tính năng tích điểm tự động (Change Streams) yêu cầu MongoDB chạy ở chế độ Replica Set. Khi dùng Atlas hoặc local standalone thông thường, tính năng này sẽ tự động bị bỏ qua — ứng dụng vẫn hoạt động bình thường.
 
 ---
 
-## 3. Seed dữ liệu mẫu (tùy chọn)
+## 3. Tạo indexes (khuyến nghị)
+
+Tạo các index tối ưu truy vấn cho database:
+
+```bash
+npm run db:indexes
+```
+
+---
+
+## 4. Seed dữ liệu mẫu (tùy chọn)
 
 Nếu database còn trống, chạy lệnh sau để tạo dữ liệu mẫu (phim, phòng, suất chiếu, coupon):
 
 ```bash
-node database/seed/index.js
+npm run db:seed
 ```
 
 > Tài khoản mặc định cũng được tạo tự động mỗi lần server khởi động — không cần seed thêm.
 
 ---
 
-## 4. Khởi động server
+## 5. Khởi động server
 
 ```bash
 # Chạy thường
@@ -89,7 +100,7 @@ Server chạy tại: **http://localhost:3000**
 
 ---
 
-## 5. Tài khoản mặc định
+## 6. Tài khoản mặc định
 
 | Email | Mật khẩu | Vai trò |
 |---|---|---|
@@ -108,7 +119,9 @@ movie_booking/
 │   ├── config/db.js       # Kết nối MongoDB
 │   └── routes/            # Các API route (movies, bookings, auth, ...)
 ├── database/
+│   ├── connection/        # Khởi tạo kết nối database
 │   ├── crud/              # Thao tác cơ bản với collection
+│   ├── indexes/           # Script tạo index
 │   ├── queries/           # Aggregation pipeline phức tạp
 │   ├── procedures/        # Logic nghiệp vụ (ghế, doanh thu, coupon)
 │   ├── transactions/      # Đặt vé ACID transaction
@@ -123,6 +136,18 @@ movie_booking/
 ├── .env.example           # Mẫu cấu hình môi trường
 └── package.json
 ```
+
+---
+
+## Scripts có sẵn
+
+| Lệnh | Mô tả |
+|---|---|
+| `npm start` | Chạy server |
+| `npm run dev` | Chạy server với auto-reload |
+| `npm run db:seed` | Seed dữ liệu mẫu |
+| `npm run db:indexes` | Tạo indexes cho database |
+| `npm run sync:auth` | Đồng bộ dữ liệu auth |
 
 ---
 
