@@ -881,3 +881,8 @@ textarea {
 .muted {
 	color: var(--muted);
 }
+
+select option {
+    background-color: var(--panel-strong); 
+    color: var(--text); 
+}
