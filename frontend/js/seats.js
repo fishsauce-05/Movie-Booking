@@ -144,17 +144,23 @@ async function loadSeatGrid(showtimeId) {
 
             for (let column = 1; column <= SEAT_COLUMNS; column += 1) {
                 const seatCode = `${rowKey}${column}`;
-                const seat = seatMap.get(seatCode) || {
-                    seat_code: seatCode,
-                    type: isVipSeatCode(seatCode) ? 'VIP' : 'NORMAL',
-                    price: 0,
-                    status: bookedSeatCodes.has(seatCode) ? 'Đã được đặt' : 'Trống'
-                };
-                const isVip = isVipSeatCode(seat.seat_code) || seat.type === 'VIP';
+                const seatData = seatMap.get(seatCode);
 
                 const el = document.createElement('button');
                 el.className = 'seat';
-                el.dataset.code = seat.seat_code;
+                el.dataset.code = seatCode;
+
+                if (!seatData) {
+                    el.classList.add('seat-nonexistent');
+                    el.disabled = true;
+                    el.textContent = column;
+                    rowEl.appendChild(el);
+                    continue;
+                }
+
+                const seat = seatData;
+                const isVip = isVipSeatCode(seat.seat_code) || seat.type === 'VIP';
+
                 el.dataset.status = seat.status;
                 el.dataset.type = isVip ? 'VIP' : seat.type;
                 el.dataset.price = seat.price;
@@ -312,9 +318,12 @@ bookBtn.addEventListener('click', async () => {
             await loadSeatGrid(currentShowtimeId);
             resetSelection();
         } else {
-            showBookMsg(`✓ ${data.message} Mã hoá đơn: ${data.bookingId}`, false);
+            const bookedSeatsList = selectedSeats.slice();
+            // Reload seat grid to reflect updated statuses before clearing selection
             await loadSeatGrid(currentShowtimeId);
             resetSelection();
+            // Show modal with booking details
+            showBookingSuccess({ bookingId: data.bookingId, totalPrice: data.totalPrice, seats: bookedSeatsList });
             // Update loyalty points shown in nav
             renderAuthNav(await fetch(`${API}/auth/${user._id}`, {
                 headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : {}
@@ -336,6 +345,22 @@ function showBookMsg(msg, isError) {
 function clearBookMsg() {
     bookMsg.textContent = '';
     bookMsg.className = 'book-msg';
+}
+
+function showBookingSuccess({ bookingId, totalPrice, seats }) {
+    const modal = document.getElementById('booking-success-modal');
+    if (!modal) return;
+    const idEl = document.getElementById('bs-booking-id');
+    const totalEl = document.getElementById('bs-total');
+    const seatsEl = document.getElementById('bs-seats');
+    const msgEl = document.getElementById('bs-message');
+
+    if (idEl) idEl.textContent = bookingId || '–';
+    if (totalEl) totalEl.textContent = typeof totalPrice !== 'undefined' ? fmt(totalPrice) : '0 VNĐ';
+    if (seatsEl) seatsEl.textContent = seats && seats.length ? seats.join(', ') : '–';
+    if (msgEl) msgEl.textContent = 'Đặt vé thành công — vui lòng kiểm tra email hoặc lịch sử đặt vé.';
+
+    modal.hidden = false;
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────

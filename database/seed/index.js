@@ -7,6 +7,7 @@ import { insertRooms } from './rooms.js';
 import { insertUsers } from './users.js';
 import { insertCoupons } from './coupons.js';
 import { insertShowtimes } from './showtimes.js';
+import { clearBookings } from './bookings.js';
 import { createIndexes } from '../indexes/createIndexes.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,7 @@ async function seedAll() {
     try {
         console.log('✓ Kết nối MongoDB thành công\n');
 
+        await clearBookings(db);
         const movieIds   = await insertMovies(db);
         const roomIds    = await insertRooms(db);
         await insertUsers(db);

@@ -266,6 +266,14 @@
     border-color: #ff8a00;
 }
 
+.seat.seat-nonexistent {
+    background: transparent;
+    border-color: transparent;
+    opacity: 0.1;
+    cursor: default;
+    pointer-events: none;
+}
+
 /* ── Booking Sidebar ──────────────────────────────────────────────────────── */
 
 .booking-sidebar {

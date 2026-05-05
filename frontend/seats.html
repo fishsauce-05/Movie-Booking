@@ -104,6 +104,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Booking success modal -->
+        <div id="booking-success-modal" class="modal-overlay" hidden>
+            <div class="modal-box">
+                <h3>Thanh toán thành công</h3>
+                <p id="bs-message">Cảm ơn bạn, vé đã được đặt thành công.</p>
+                <div class="sidebar-block">
+                    <span class="sidebar-label">Mã hoá đơn</span>
+                    <span id="bs-booking-id" class="sidebar-value">–</span>
+                </div>
+                <div class="sidebar-block">
+                    <span class="sidebar-label">Ghế</span>
+                    <span id="bs-seats" class="sidebar-value">–</span>
+                </div>
+                <div class="sidebar-block">
+                    <span class="sidebar-label">Tổng thanh toán</span>
+                    <span id="bs-total" class="sidebar-value">0 VNĐ</span>
+                </div>
+                <div class="modal-actions">
+                    <button class="button button-secondary" onclick="document.getElementById('booking-success-modal').hidden=true">Đóng</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="js/auth.js"></script>
