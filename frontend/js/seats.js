@@ -324,10 +324,19 @@ bookBtn.addEventListener('click', async () => {
             resetSelection();
             // Show modal with booking details
             showBookingSuccess({ bookingId: data.bookingId, totalPrice: data.totalPrice, seats: bookedSeatsList });
-            // Update loyalty points shown in nav
-            renderAuthNav(await fetch(`${API}/auth/${user._id}`, {
-                headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : {}
-            }).then((r) => r.json()));
+            // Update loyalty points shown in nav and persist to localStorage
+            try {
+                const updatedUser = await fetch(`${API}/auth/${user._id}`, {
+                    headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : {}
+                }).then((r) => r.json());
+                if (updatedUser && updatedUser._id) {
+                    // persist new user data so homepage shows updated points
+                    if (typeof saveUser === 'function') saveUser(updatedUser);
+                    renderAuthNav(updatedUser);
+                }
+            } catch (err) {
+                // ignore; leave current nav as-is
+            }
         }
     } catch {
         showBookMsg('Lỗi hệ thống. Vui lòng thử lại.', true);
