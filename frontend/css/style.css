@@ -890,6 +890,135 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 
 select option {
-    background-color: var(--panel-strong); 
-    color: var(--text); 
+    background-color: var(--panel-strong);
+    color: var(--text);
+}
+
+/* ── Modal actions (shared) ───────────────────────────────────────────────── */
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+/* ── Booking history modal ────────────────────────────────────────────────── */
+
+.bh-modal-box {
+    width: min(680px, calc(100vw - 32px));
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.bh-list {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+    padding-right: 4px;
+}
+
+.bh-loading,
+.bh-empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 24px 0;
+    margin: 0;
+}
+
+.bh-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.bh-poster {
+    width: 56px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.bh-poster-placeholder {
+    background: var(--panel-strong);
+}
+
+.bh-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bh-movie-title {
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bh-meta {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.bh-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.bh-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.bh-status-complete {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.bh-status-cancelled {
+    background: rgba(255, 107, 107, 0.15);
+    color: var(--danger);
+}
+
+.bh-cancel-btn {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    background: rgba(255, 107, 107, 0.08);
+    color: var(--danger);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 180ms ease;
+}
+
+.bh-cancel-btn:hover {
+    background: rgba(255, 107, 107, 0.18);
+}
+
+.bh-btn-danger {
+    background: linear-gradient(135deg, #ff6b6b, #e63946);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 10px 20px;
 }
