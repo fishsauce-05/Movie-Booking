@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chọn ghế – Cinema Pulse</title>
+    <title>Chọn ghế – Fishsauce Cinema</title>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/seats.css">
@@ -12,9 +12,9 @@
     <div class="page-shell">
         <header class="topbar">
             <a class="brand" href="index.html">
-                <span class="brand-mark">CP</span>
+                <span class="brand-mark">FS</span>
                 <span class="brand-text">
-                    <strong>Cinema Pulse</strong>
+                    <strong>Fishsauce Cinema</strong>
                     <small>Đặt vé nhanh, xem phim gọn</small>
                 </span>
             </a>
@@ -105,6 +105,29 @@
             </div>
         </div>
 
+        <!-- VietQR payment modal -->
+        <div id="payment-modal" class="modal-overlay" hidden>
+            <div class="modal-box" style="text-align:center;max-width:400px">
+                <h3>Thanh toán chuyển khoản</h3>
+                <p style="color:var(--muted);margin:0 0 16px;font-size:.875rem">Quét mã QR bên dưới để thanh toán. Sau khi chuyển khoản thành công, nhấn xác nhận.</p>
+                <div style="margin-bottom:16px">
+                    <img id="qr-image" src="" alt="QR thanh toán" style="width:240px;height:240px;border:1px solid #eee;border-radius:8px">
+                </div>
+                <div style="border-radius:8px;padding:12px;margin-bottom:20px;text-align:left;font-size:.85rem">
+                    <div><strong>Ngân hàng:</strong> MB Bank</div>
+                    <div><strong>Số TK:</strong> 15151205051601</div>
+                    <div><strong>Chủ TK:</strong> NGO DUC MANH</div>
+                    <div><strong>Số tiền:</strong> <span id="qr-amount" style="color:var(--primary,#e05c3a);font-weight:600"></span></div>
+                    <div><strong>Nội dung CK:</strong> <span id="qr-desc"></span></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="button button-secondary" id="payment-cancel-btn">Hủy</button>
+                    <button type="button" class="button button-primary" id="payment-confirm-btn">Tôi đã chuyển khoản</button>
+                </div>
+                <p id="payment-msg" class="book-msg" style="margin-top:8px"></p>
+            </div>
+        </div>
+
         <!-- Booking success modal -->
         <div id="booking-success-modal" class="modal-overlay" hidden>
             <div class="modal-box">
@@ -123,7 +146,7 @@
                     <span id="bs-total" class="sidebar-value">0 VNĐ</span>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="button button-secondary" onclick="document.getElementById('booking-success-modal').hidden=true">Đóng</button>
+                    <button type="button" class="button button-secondary" onclick="location.reload()">Đóng</button>
                 </div>
             </div>
         </div>

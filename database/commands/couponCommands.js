@@ -1,10 +1,5 @@
 import { ObjectId } from 'mongodb';
-
-function httpError(message, status) {
-    const err = new Error(message);
-    err.status = status;
-    return err;
-}
+import { httpError } from '../validators/index.js';
 
 async function createCoupon(db, data) {
     const result = await db.collection('Coupons').insertOne({
@@ -23,23 +18,10 @@ async function createCoupon(db, data) {
     return result.insertedId;
 }
 
-// Tạo coupon kèm kiểm tra trùng mã
 async function createCouponChecked(db, data) {
     const existing = await db.collection('Coupons').findOne({ code: data.code });
     if (existing) throw httpError('Mã coupon đã tồn tại.', 409);
     return createCoupon(db, data);
-}
-
-async function getAllCoupons(db) {
-    return db.collection('Coupons').find({}).toArray();
-}
-
-async function getCouponById(db, id) {
-    return db.collection('Coupons').findOne({ _id: new ObjectId(id) });
-}
-
-async function getCouponByCode(db, code) {
-    return db.collection('Coupons').findOne({ code });
 }
 
 async function updateCoupon(db, id, data) {
@@ -63,13 +45,4 @@ async function deleteCoupon(db, id) {
     return result.deletedCount;
 }
 
-export {
-    createCoupon,
-    createCouponChecked,
-    getAllCoupons,
-    getCouponById,
-    getCouponByCode,
-    updateCoupon,
-    updateCouponStatus,
-    deleteCoupon
-};
+export { createCoupon, createCouponChecked, updateCoupon, updateCouponStatus, deleteCoupon };

@@ -1,21 +1,21 @@
 // Aggregation Pipeline — Xác thực và tính toán mã giảm giá
 // Tất cả logic tính toán giảm giá chạy hoàn toàn trong MongoDB (server-side)
 
-async function validateCoupon(db, code, totalPrice) {
+async function validateCoupon(db, code, totalPrice, customerId = null) {
     const now   = new Date();
     const price = Number(totalPrice);
 
+    const matchStage = {
+        code,
+        status:     'ACTIVE',
+        start_date: { $lte: now },
+        end_date:   { $gte: now },
+        $expr:      { $lt: ['$used_count', '$max_uses'] }
+    };
+
     const pipeline = [
         // Stage 1: Tìm coupon còn hiệu lực
-        {
-            $match: {
-                code,
-                status:     'ACTIVE',
-                start_date: { $lte: now },
-                end_date:   { $gte: now },
-                $expr:      { $lt: ['$used_count', '$max_uses'] }
-            }
-        },
+        { $match: matchStage },
         // Stage 2: Tính toán giảm giá và tính tiền cuối — tất cả trên MongoDB
         {
             $project: {
@@ -65,7 +65,21 @@ async function validateCoupon(db, code, totalPrice) {
     ];
 
     const result = await db.collection('Coupons').aggregate(pipeline).toArray();
-    return result[0] || null;
+    const coupon = result[0] || null;
+    if (!coupon) return null;
+
+    if (customerId) {
+        const { ObjectId } = await import('mongodb');
+        if (ObjectId.isValid(customerId)) {
+            const used = await db.collection('CouponUsages').findOne({
+                coupon_id:   coupon._id,
+                customer_id: new ObjectId(String(customerId))
+            });
+            if (used) return null;
+        }
+    }
+
+    return coupon;
 }
 
 export { validateCoupon };

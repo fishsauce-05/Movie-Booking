@@ -1,3 +1,12 @@
+// Block STAFF/ADMIN — họ dùng admin.html
+(function guardSeatPage() {
+    if (typeof getCurrentUser !== 'function') return;
+    const u = getCurrentUser();
+    if (u && (u.role === 'ADMIN' || u.role === 'STAFF')) {
+        location.replace('admin.html');
+    }
+})();
+
 const API = '/api';
 
 const params = new URLSearchParams(location.search);
@@ -30,10 +39,9 @@ const SEAT_COLUMNS = 10;
 const SEAT_ROWS = ['A', 'B', 'C', 'D', 'E'];
 
 function isVipSeatCode(seatCode) {
-    const row = String(seatCode || '').charAt(0).toUpperCase();
+    const row    = String(seatCode || '').charAt(0).toUpperCase();
     const column = Number(String(seatCode || '').slice(1));
-    const vipRows = ['C', 'D', 'E'];
-    return vipRows.includes(row) && column >= 3 && column <= 8;
+    return (row === 'C' || row === 'D') && column >= 4 && column <= 8;
 }
 
 function fmt(n) {
@@ -257,7 +265,7 @@ couponBtn.addEventListener('click', async () => {
         const res = await fetch(`${API}/coupons/validate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, totalPrice: basePrice })
+            body: JSON.stringify({ code, totalPrice: basePrice, customerId: getCurrentUser()?._id || undefined })
         });
         const data = await res.json();
 
@@ -284,66 +292,88 @@ function setCouponMsg(msg, isError) {
     couponMsg.className = 'coupon-msg' + (isError ? ' coupon-error' : ' coupon-ok');
 }
 
-// ── Booking ──────────────────────────────────────────────────────────────────
+// ── VietQR Payment ────────────────────────────────────────────────────────────
 
-bookBtn.addEventListener('click', async () => {
+function showPaymentQR(totalPrice) {
+    const desc     = `DatVe${Date.now()}`;
+    const qrUrl    = `https://img.vietqr.io/image/MB-15151205051601-compact2.png?amount=${totalPrice}&addInfo=${encodeURIComponent(desc)}&accountName=NGO%20DUC%20MANH`;
+
+    document.getElementById('qr-image').src     = qrUrl;
+    document.getElementById('qr-amount').textContent = fmt(totalPrice);
+    document.getElementById('qr-desc').textContent   = desc;
+    document.getElementById('payment-msg').textContent = '';
+    document.getElementById('payment-modal').hidden  = false;
+}
+
+document.getElementById('payment-cancel-btn').addEventListener('click', () => {
+    document.getElementById('payment-modal').hidden = true;
+    location.reload();
+});
+
+document.getElementById('payment-confirm-btn').addEventListener('click', async () => {
+    const confirmBtn = document.getElementById('payment-confirm-btn');
+    const msgEl      = document.getElementById('payment-msg');
+    confirmBtn.disabled    = true;
+    confirmBtn.textContent = 'Đang xử lý...';
+    msgEl.textContent      = '';
+
     const user = getCurrentUser();
-    if (!user) {
-        document.getElementById('login-required-modal').hidden = false;
-        return;
-    }
-
-    if (!currentShowtimeId || !selectedSeats.length) return;
-
-    bookBtn.disabled = true;
-    bookBtn.textContent = 'Đang xử lý...';
-    clearBookMsg();
-
     try {
         const res = await fetch(`${API}/bookings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...(typeof getAuthHeaders === 'function' ? getAuthHeaders() : {}) },
             body: JSON.stringify({
-                customerId: user._id,
-                showtimeId: currentShowtimeId,
+                customerId:  user._id,
+                showtimeId:  currentShowtimeId,
                 seatsToBook: selectedSeats,
-                couponCode: validatedCoupon || undefined
+                couponCode:  validatedCoupon || undefined
             })
         });
         const data = await res.json();
 
         if (!res.ok) {
-            showBookMsg(data.message, true);
-            // Reload seat grid to reflect updated statuses
-            await loadSeatGrid(currentShowtimeId);
-            resetSelection();
+            msgEl.textContent = data.message;
+            msgEl.className   = 'book-msg book-msg-error';
         } else {
             const bookedSeatsList = selectedSeats.slice();
-            // Reload seat grid to reflect updated statuses before clearing selection
+            document.getElementById('payment-modal').hidden = true;
             await loadSeatGrid(currentShowtimeId);
             resetSelection();
-            // Show modal with booking details
             showBookingSuccess({ bookingId: data.bookingId, totalPrice: data.totalPrice, seats: bookedSeatsList });
-            // Update loyalty points shown in nav and persist to localStorage
             try {
                 const updatedUser = await fetch(`${API}/auth/${user._id}`, {
                     headers: typeof getAuthHeaders === 'function' ? getAuthHeaders() : {}
                 }).then((r) => r.json());
                 if (updatedUser && updatedUser._id) {
-                    // persist new user data so homepage shows updated points
                     if (typeof saveUser === 'function') saveUser(updatedUser);
                     renderAuthNav(updatedUser);
                 }
-            } catch (err) {
-                // ignore; leave current nav as-is
-            }
+            } catch { /* ignore */ }
         }
     } catch {
-        showBookMsg('Lỗi hệ thống. Vui lòng thử lại.', true);
+        msgEl.textContent = 'Lỗi hệ thống. Vui lòng thử lại.';
+        msgEl.className   = 'book-msg book-msg-error';
     } finally {
-        bookBtn.disabled = selectedSeats.length === 0;
+        confirmBtn.disabled    = false;
+        confirmBtn.textContent = 'Tôi đã chuyển khoản';
+        bookBtn.disabled    = selectedSeats.length === 0;
         bookBtn.textContent = 'Đặt vé';
     }
+});
+
+// ── Booking ──────────────────────────────────────────────────────────────────
+
+bookBtn.addEventListener('click', () => {
+    const user = getCurrentUser();
+    if (!user) {
+        document.getElementById('login-required-modal').hidden = false;
+        return;
+    }
+    if (!currentShowtimeId || !selectedSeats.length) return;
+    clearBookMsg();
+
+    const total = Math.max(0, basePrice - discount);
+    showPaymentQR(total);
 });
 
 function showBookMsg(msg, isError) {
@@ -367,7 +397,7 @@ function showBookingSuccess({ bookingId, totalPrice, seats }) {
     if (idEl) idEl.textContent = bookingId || '–';
     if (totalEl) totalEl.textContent = typeof totalPrice !== 'undefined' ? fmt(totalPrice) : '0 VNĐ';
     if (seatsEl) seatsEl.textContent = seats && seats.length ? seats.join(', ') : '–';
-    if (msgEl) msgEl.textContent = 'Đặt vé thành công — vui lòng kiểm tra email hoặc lịch sử đặt vé.';
+    if (msgEl) msgEl.textContent = 'Đặt vé thành công!';
 
     modal.hidden = false;
 }

@@ -1,11 +1,12 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
-import { createMovie, getAllMovies, updateMovie, deleteMovie } from '../../database/crud/movieCRUD.js';
-import { getAllRooms } from '../../database/crud/roomCRUD.js';
-import { createShowtime, updateShowtimeFields, deleteShowtime } from '../../database/crud/showtimeCRUD.js';
-import { updateUser } from '../../database/crud/userCRUD.js';
-import { createCouponChecked, updateCouponStatus } from '../../database/crud/couponCRUD.js';
-import { getAdminShowtimes, searchUsers, getRevenueByMovieFiltered, getAdminCoupons } from '../../database/queries/adminQueries.js';
+import { createMovie, updateMovie, deleteMovie } from '../../database/commands/movieCommands.js';
+import { createShowtime, updateShowtimeInfo, deleteShowtime } from '../../database/commands/showtimeCommands.js';
+import { updateUserRole } from '../../database/commands/userCommands.js';
+import { createCouponChecked, updateCouponStatus } from '../../database/commands/couponCommands.js';
+import { getAllMovies } from '../../database/queries/movieQueries.js';
+import { getAllRooms } from '../../database/queries/roomQueries.js';
+import { getAdminShowtimes, searchUsers, getRevenueByMovieFiltered, getAdminCoupons, getAllBookingsAdmin } from '../../database/queries/adminQueries.js';
 import { getMonthlyRevenue } from '../../database/queries/revenueQueries.js';
 import createAuthMiddleware from '../middleware/auth.js';
 
@@ -17,14 +18,14 @@ export default function createAdminRoutes(db) {
 
     // ── MOVIES ──────────────────────────────────────────────────────────────
 
-    router.get('/movies', requireRole('MANAGER'), async (req, res, next) => {
+    router.get('/movies', requireRole('ADMIN'), async (req, res, next) => {
         try {
             const movies = await getAllMovies(db);
             res.json(movies);
         } catch (error) { next(error); }
     });
 
-    router.post('/movies', requireRole('MANAGER'), async (req, res, next) => {
+    router.post('/movies', requireRole('ADMIN'), async (req, res, next) => {
         try {
             const { title } = req.body;
             if (!title) return res.status(400).json({ message: 'Tên phim là bắt buộc.' });
@@ -34,7 +35,7 @@ export default function createAdminRoutes(db) {
         } catch (error) { next(error); }
     });
 
-    router.put('/movies/:id', requireRole('MANAGER'), async (req, res, next) => {
+    router.put('/movies/:id', requireRole('ADMIN'), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID không hợp lệ.' });
 
@@ -51,7 +52,7 @@ export default function createAdminRoutes(db) {
         } catch (error) { next(error); }
     });
 
-    router.delete('/movies/:id', requireRole('MANAGER'), async (req, res, next) => {
+    router.delete('/movies/:id', requireRole('ADMIN'), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID không hợp lệ.' });
 
@@ -63,46 +64,33 @@ export default function createAdminRoutes(db) {
 
     // ── SHOWTIMES ────────────────────────────────────────────────────────────
 
-    router.get('/showtimes', requireRole('MANAGER', 'STAFF'), async (req, res, next) => {
+    router.get('/showtimes', requireRole('ADMIN', 'STAFF'), async (req, res, next) => {
         try {
             const showtimes = await getAdminShowtimes(db);
             res.json(showtimes);
         } catch (error) { next(error); }
     });
 
-    router.post('/showtimes', requireRole('MANAGER'), async (req, res, next) => {
+    router.post('/showtimes', requireRole('ADMIN'), async (req, res, next) => {
         try {
             const result = await createShowtime(db, req.body);
             res.status(201).json(result);
         } catch (error) { next(error); }
     });
 
-    router.patch('/showtimes/:id', requireRole('MANAGER', 'STAFF'), async (req, res, next) => {
+    router.patch('/showtimes/:id', requireRole('ADMIN', 'STAFF'), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID không hợp lệ.' });
 
-            const update = {};
-            if (req.body.room_name  !== undefined) update.room_name  = req.body.room_name;
-            if (req.body.start_time !== undefined) update.start_time = new Date(req.body.start_time);
-            if (req.body.end_time   !== undefined) update.end_time   = new Date(req.body.end_time);
-
-            if (Array.isArray(req.body.seats)) {
-                const VALID_STATUS = ['Trống', 'Đã được đặt', 'Đang giữ chờ thanh toán'];
-                update.seats = req.body.seats.map((seat) => ({
-                    seat_code: String(seat.seat_code),
-                    type:      seat.type === 'VIP' ? 'VIP' : 'NORMAL',
-                    price:     Number(seat.price) || 0,
-                    status:    VALID_STATUS.includes(seat.status) ? seat.status : 'Trống'
-                }));
-            }
-
-            const matched = await updateShowtimeFields(db, req.params.id, update);
-            if (!matched) return res.status(404).json({ message: 'Không tìm thấy suất chiếu.' });
+            await updateShowtimeInfo(db, req.params.id, req.body);
             res.json({ message: 'Cập nhật suất chiếu thành công.' });
-        } catch (error) { next(error); }
+        } catch (error) {
+            if (error.status) return res.status(error.status).json({ message: error.message });
+            next(error);
+        }
     });
 
-    router.delete('/showtimes/:id', requireRole('MANAGER'), async (req, res, next) => {
+    router.delete('/showtimes/:id', requireRole('ADMIN'), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID không hợp lệ.' });
 
@@ -112,31 +100,39 @@ export default function createAdminRoutes(db) {
         } catch (error) { next(error); }
     });
 
+    // ── BOOKINGS ─────────────────────────────────────────────────────────────
+
+    router.get('/bookings', requireRole('ADMIN', 'STAFF'), async (_req, res, next) => {
+        try {
+            const bookings = await getAllBookingsAdmin(db);
+            res.json(bookings);
+        } catch (error) { next(error); }
+    });
+
     // ── USERS ────────────────────────────────────────────────────────────────
 
-    router.get('/users', requireRole('MANAGER'), async (req, res, next) => {
+    router.get('/users', requireRole('ADMIN'), async (req, res, next) => {
         try {
             const users = await searchUsers(db, req.query.role, req.query.q);
             res.json(users);
         } catch (error) { next(error); }
     });
 
-    router.patch('/users/:id', requireRole('MANAGER'), async (req, res, next) => {
+    router.patch('/users/:id', requireRole('ADMIN'), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID không hợp lệ.' });
 
-            const allowed = ['role', 'full_name', 'phone'];
-            const update  = {};
-            allowed.forEach((f) => { if (req.body[f] !== undefined) update[f] = req.body[f]; });
-
-            await updateUser(db, req.params.id, update);
+            await updateUserRole(db, req.currentUser, req.params.id, req.body.role);
             res.json({ message: 'Cập nhật người dùng thành công.' });
-        } catch (error) { next(error); }
+        } catch (error) {
+            if (error.status) return res.status(error.status).json({ message: error.message });
+            next(error);
+        }
     });
 
     // ── REVENUE ──────────────────────────────────────────────────────────────
 
-    router.get('/revenue/monthly', requireRole('MANAGER'), async (req, res, next) => {
+    router.get('/revenue/monthly', requireRole('ADMIN'), async (req, res, next) => {
         try {
             const year    = Number(req.query.year) || new Date().getFullYear();
             const revenue = await getMonthlyRevenue(db, year);
@@ -144,7 +140,7 @@ export default function createAdminRoutes(db) {
         } catch (error) { next(error); }
     });
 
-    router.get('/revenue/movies', requireRole('MANAGER'), async (req, res, next) => {
+    router.get('/revenue/movies', requireRole('ADMIN'), async (req, res, next) => {
         try {
             const result = await getRevenueByMovieFiltered(db, req.query.from, req.query.to);
             res.json(result);
@@ -153,14 +149,14 @@ export default function createAdminRoutes(db) {
 
     // ── COUPONS ──────────────────────────────────────────────────────────────
 
-    router.get('/coupons', requireRole('MANAGER'), async (req, res, next) => {
+    router.get('/coupons', requireRole('ADMIN'), async (req, res, next) => {
         try {
             const coupons = await getAdminCoupons(db);
             res.json(coupons);
         } catch (error) { next(error); }
     });
 
-    router.post('/coupons', requireRole('MANAGER'), async (req, res, next) => {
+    router.post('/coupons', requireRole('ADMIN'), async (req, res, next) => {
         try {
             const { code, discount_type, discount_value, max_uses, start_date, end_date } = req.body;
             if (!code || !discount_type || !discount_value || !max_uses || !start_date || !end_date) {
@@ -175,7 +171,7 @@ export default function createAdminRoutes(db) {
         }
     });
 
-    router.patch('/coupons/:id', requireRole('MANAGER'), async (req, res, next) => {
+    router.patch('/coupons/:id', requireRole('ADMIN'), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID không hợp lệ.' });
 
@@ -186,7 +182,7 @@ export default function createAdminRoutes(db) {
 
     // ── ROOMS (read-only for dropdown) ───────────────────────────────────────
 
-    router.get('/rooms', requireRole('MANAGER', 'STAFF'), async (req, res, next) => {
+    router.get('/rooms', requireRole('ADMIN', 'STAFF'), async (req, res, next) => {
         try {
             const rooms = (await getAllRooms(db)).filter((r) => r.status === 'Active').map((r) => ({
                 _id:         r._id,

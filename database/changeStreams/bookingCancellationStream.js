@@ -36,20 +36,18 @@ function startBookingCancellationListener(db) {
 
         changeStream.on('change', async (change) => {
             try {
-                const booking      = change.fullDocument;
-                const pointsToUndo = Math.floor(booking.total_price / 10000);
+                const booking       = change.fullDocument;
+                // Dùng subtotal_price (giá gốc trước giảm giá) — đối xứng với loyaltyStream
+                const earnedPoints  = Math.floor((booking.subtotal_price || 0) / 10000);
+                const penaltyPoints = 10;
+                const totalDeduct   = earnedPoints + penaltyPoints;
 
-                console.log(`Đặt vé ${booking._id} bị hủy. Hoàn ${pointsToUndo} điểm cho khách hàng ${booking.customer_id}.`);
+                console.log(`Đặt vé ${booking._id} bị hủy. Trừ ${earnedPoints} điểm tích lũy + ${penaltyPoints} điểm phạt = ${totalDeduct} điểm của khách hàng ${booking.customer_id}.`);
 
-                const customer = await usersCol.findOne(
-                    { _id: booking.customer_id },
-                    { projection: { loyalty_points: 1 } }
-                );
-
-                // Trừ lại điểm tích lũy đã tặng khi đặt vé (đối xứng với loyaltyStream)
+                // Trừ điểm tích lũy đã tặng + 10 điểm phạt hủy vé, không xuống dưới 0
                 await usersCol.updateOne(
                     { _id: booking.customer_id },
-                    { $set: { loyalty_points: Math.max(0, (customer?.loyalty_points || 0) - pointsToUndo) } }
+                    [{ $set: { loyalty_points: { $max: [0, { $subtract: ['$loyalty_points', totalDeduct] }] } } }]
                 );
 
                 // Giải phóng ghế về "Trống" trong suất chiếu tương ứng

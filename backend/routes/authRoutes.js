@@ -1,6 +1,7 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
-import { registerUser, loginUser, getUserProfile, updateUser, changePassword } from '../../database/crud/userCRUD.js';
+import { registerUser, loginUser, updateUser, changePassword } from '../../database/commands/userCommands.js';
+import { getUserProfile } from '../../database/queries/userQueries.js';
 import createAuthMiddleware from '../middleware/auth.js';
 
 export default function createAuthRoutes(db) {
@@ -37,7 +38,7 @@ export default function createAuthRoutes(db) {
         }
     });
 
-    router.get('/:id', loadCurrentUser(), requireSelfOrRole({ targetParamFields: ['id'], allowedRoles: ['MANAGER'] }), async (req, res, next) => {
+    router.get('/:id', loadCurrentUser(), requireSelfOrRole({ targetParamFields: ['id'], allowedRoles: ['ADMIN'] }), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) {
                 return res.status(400).json({ message: 'ID không hợp lệ.' });
@@ -52,7 +53,7 @@ export default function createAuthRoutes(db) {
         }
     });
 
-    router.patch('/:id', loadCurrentUser(), requireSelfOrRole({ targetParamFields: ['id'], allowedRoles: ['MANAGER'] }), async (req, res, next) => {
+    router.patch('/:id', loadCurrentUser(), requireSelfOrRole({ targetParamFields: ['id'], allowedRoles: ['ADMIN'] }), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) {
                 return res.status(400).json({ message: 'ID không hợp lệ.' });
@@ -69,7 +70,7 @@ export default function createAuthRoutes(db) {
         }
     });
 
-    router.patch('/:id/password', loadCurrentUser(), requireSelfOrRole({ targetParamFields: ['id'], allowedRoles: ['MANAGER'] }), async (req, res, next) => {
+    router.patch('/:id/password', loadCurrentUser(), requireSelfOrRole({ targetParamFields: ['id'], allowedRoles: ['ADMIN'] }), async (req, res, next) => {
         try {
             if (!ObjectId.isValid(req.params.id)) {
                 return res.status(400).json({ message: 'ID không hợp lệ.' });

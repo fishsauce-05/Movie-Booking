@@ -56,4 +56,9 @@ async function insertCoupons(db) {
     return result.insertedIds;
 }
 
-export { COUPONS, insertCoupons };
+async function clearCouponUsages(db) {
+    await db.collection('CouponUsages').deleteMany({});
+    console.log('✓ Xóa CouponUsages');
+}
+
+export { COUPONS, insertCoupons, clearCouponUsages };

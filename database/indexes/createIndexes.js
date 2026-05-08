@@ -37,6 +37,15 @@ async function createIndexes(db) {
     await db.collection('Coupons').createIndex({ code: 1 }, { unique: true, name: 'coupons_code_unique' });
     await db.collection('Coupons').createIndex({ status: 1, end_date: 1 }, { name: 'coupons_status_expiry' });
 
+    // CouponUsages
+    await db.createCollection('CouponUsages').catch(() => {});
+    await db.collection('CouponUsages').createIndex(
+        { coupon_id: 1, customer_id: 1 },
+        { unique: true, name: 'couponusages_coupon_customer_unique' }
+    );
+    await db.collection('CouponUsages').createIndex({ booking_id: 1 }, { name: 'couponusages_booking' });
+    await db.collection('CouponUsages').createIndex({ customer_id: 1 }, { name: 'couponusages_customer' });
+
     console.log('✓ Tạo chỉ mục thành công');
 }
 

@@ -37,7 +37,7 @@ function startLoyaltyPointListener(db) {
         changeStream.on('change', async (change) => {
             try {
                 const booking      = change.fullDocument;
-                const pointsToAward = Math.floor(booking.total_price / 10000);
+                const pointsToAward = Math.floor(booking.subtotal_price / 10000);
 
                 console.log(`Hoá đơn ${booking._id} hoàn tất. Cộng ${pointsToAward} điểm cho khách hàng.`);
 

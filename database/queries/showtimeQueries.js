@@ -137,6 +137,37 @@ async function getShowtimesWithMovieInfo(db) {
     ]).toArray();
 }
 
+async function getAllShowtimes(db) {
+    return db.collection('Showtimes').find({}).toArray();
+}
+
+async function getShowtimeById(db, id) {
+    return db.collection('Showtimes').findOne({ _id: new ObjectId(id) });
+}
+
+async function getShowTimeByFilter(db, {date, start_time, end_time}) {
+    const matchDay = {};
+
+    if (date) {
+        const dayStart = new Date(`${date}T00:00:00`);
+        const dayEnd = new Date(`${date}T23:59:59`);
+        matchDay.start_time = { $gte: dayStart, $lte: dayEnd };
+    }
+    const pipelineTime = [{$match: matchDay}];
+    if (start_time || end_time) {
+        pipelineTime.push({ $addFields: { hourMin: { $dateToString: {format: '%H:%M', date: '$start_time', timezone: '+7:00'}}}});
+    }
+
+    if (start_time) pipelineTime.push({$match: { hourMin: { $gte: start_time}}});
+    if (end_time) pipelineTime.push({$match: { hourMin: {$lte: end_time}}});
+
+    pipelineTime.push({ $group: { _id: '$movie_id'}});
+    pipelineTime.push({ $project: { movie_id: '$_id', _id: 0}});
+
+    const rows = await db.collection('Showtimes').aggregate(pipelineTime).toArray();
+    return rows;
+}
+
 export {
     getShowtimesByMovie,
     getUpcomingShowtimesByMovie,
@@ -144,5 +175,8 @@ export {
     getShowtimesByRoom,
     getShowtimeWithMovieInfo,
     getAvailableSeats,
-    getShowtimesWithMovieInfo
+    getShowtimesWithMovieInfo,
+    getAllShowtimes,
+    getShowtimeById,
+    getShowTimeByFilter
 };

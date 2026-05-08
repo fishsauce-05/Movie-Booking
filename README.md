@@ -106,7 +106,7 @@ Server chạy tại: **http://localhost:3000**
 |---|---|---|
 | `user.customer@gmail.com` | `12341234` | Khách hàng |
 | `user.staff@gmail.com` | `12341234` | Nhân viên |
-| `user.admin@gmail.com` | `12341234` | Quản lý |
+| `user.admin@gmail.com` | `12341234` | Admin |
 
 ---
 
@@ -160,7 +160,7 @@ movie_booking/
 | GET | `/api/showtimes` | Danh sách suất chiếu |
 | POST | `/api/auth/login` | Đăng nhập |
 | POST | `/api/bookings` | Đặt vé |
-| GET | `/api/admin/revenue` | Báo cáo doanh thu (MANAGER) |
+| GET | `/api/admin/revenue` | Báo cáo doanh thu (ADMIN) |
 
 ---
 

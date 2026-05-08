@@ -6,15 +6,15 @@ export default function createCouponRoutes(db) {
 
     router.post('/validate', async (req, res, next) => {
         try {
-            const { code, totalPrice } = req.body;
+            const { code, totalPrice, customerId } = req.body;
             if (!code || !totalPrice) {
                 return res.status(400).json({ message: 'Thiếu mã coupon hoặc giá trị đơn hàng.' });
             }
 
-            const result = await validateCoupon(db, code, Number(totalPrice));
+            const result = await validateCoupon(db, code, Number(totalPrice), customerId || null);
 
             if (!result) {
-                return res.status(404).json({ message: 'Mã giảm giá không hợp lệ hoặc đã hết hạn.' });
+                return res.status(404).json({ message: 'Mã giảm giá không hợp lệ, đã hết hạn hoặc bạn đã sử dụng mã này rồi.' });
             }
             if (!result.isEligible) {
                 return res.status(400).json({

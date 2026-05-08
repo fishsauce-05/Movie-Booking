@@ -77,4 +77,26 @@ async function checkExistingReview(db, movieId, customerId) {
     return Boolean(existing);
 }
 
-export { getReviewsByMoviePaginated, checkCustomerBookedMovie, checkExistingReview };
+async function getAllReviews(db) {
+    return db.collection('Reviews').find({}).toArray();
+}
+
+async function getReviewById(db, id) {
+    return db.collection('Reviews').findOne({ _id: new ObjectId(id) });
+}
+
+async function getReviewsByMovie(db, movieId) {
+    return db.collection('Reviews')
+        .find({ movie_id: new ObjectId(movieId) })
+        .sort({ created_at: -1 })
+        .toArray();
+}
+
+export {
+    getReviewsByMoviePaginated,
+    checkCustomerBookedMovie,
+    checkExistingReview,
+    getAllReviews,
+    getReviewById,
+    getReviewsByMovie
+};

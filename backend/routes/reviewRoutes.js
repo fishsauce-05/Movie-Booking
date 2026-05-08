@@ -1,7 +1,8 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
 import { getReviewsByMoviePaginated, checkCustomerBookedMovie, checkExistingReview } from '../../database/queries/reviewQueries.js';
-import { createReview, getReviewById, deleteReview } from '../../database/crud/reviewCRUD.js';
+import { createReview, deleteReview } from '../../database/commands/reviewCommands.js';
+import { getReviewById } from '../../database/queries/reviewQueries.js';
 import createAuthMiddleware from '../middleware/auth.js';
 
 export default function createReviewRoutes(db) {
@@ -67,7 +68,7 @@ export default function createReviewRoutes(db) {
             const review = await getReviewById(db, req.params.id);
             if (!review) return res.status(404).json({ message: 'Không tìm thấy đánh giá.' });
 
-            if (req.currentUser.role !== 'MANAGER' && String(review.customer_id) !== String(req.currentUser._id)) {
+            if (req.currentUser.role !== 'ADMIN' && String(review.customer_id) !== String(req.currentUser._id)) {
                 return res.status(403).json({ message: 'Bạn không có quyền xoá đánh giá này.' });
             }
 

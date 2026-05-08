@@ -10,6 +10,12 @@ async function getBookingsByCustomer(db, customerId) {
 
 // Lấy đặt vé kèm đầy đủ thông tin suất chiếu + phim (dùng nested $lookup)
 async function getBookingsByCustomerWithDetails(db, customerId) {
+    if (!ObjectId.isValid(customerId)) {
+        const err = new Error('ID khách hàng không hợp lệ.');
+        err.status = 400;
+        throw err;
+    }
+
     return db.collection('Bookings').aggregate([
         { $match: { customer_id: new ObjectId(customerId) } },
         {
@@ -69,9 +75,62 @@ async function getBookingSummaryByStatus(db) {
     return db.collection('Bookings').aggregate(pipeline).toArray();
 }
 
+async function getStaffBookingById(db, bookingId) {
+    if (!ObjectId.isValid(bookingId)) {
+        const err = new Error('Mã đặt vé không hợp lệ.');
+        err.status = 400;
+        throw err;
+    }
+
+    const [booking] = await db.collection('Bookings').aggregate([
+        { $match: { _id: new ObjectId(bookingId) } },
+        {
+            $lookup: {
+                from: 'Showtimes',
+                localField: 'showtime_id',
+                foreignField: '_id',
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: 'Movies',
+                            localField: 'movie_id',
+                            foreignField: '_id',
+                            pipeline: [{ $project: { title: 1 } }],
+                            as: 'movie'
+                        }
+                    },
+                    { $addFields: { movie: { $first: '$movie' } } },
+                    { $project: { seats: 0 } }
+                ],
+                as: 'showtime'
+            }
+        },
+        { $addFields: { showtime: { $first: '$showtime' } } }
+    ]).toArray();
+
+    if (!booking) {
+        const err = new Error('Không tìm thấy đặt vé.');
+        err.status = 404;
+        throw err;
+    }
+
+    return booking;
+}
+
+async function getAllBookings(db) {
+    return db.collection('Bookings').find({}).toArray();
+}
+
+async function getBookingById(db, id) {
+    return db.collection('Bookings').findOne({ _id: new ObjectId(id) });
+}
+
 export {
     getBookingsByCustomer,
     getBookingsByCustomerWithDetails,
     getBookingsByShowtime,
-    getBookingSummaryByStatus
+    getBookingSummaryByStatus,
+    getStaffBookingById,
+    getAllBookings,
+    getBookingById
 };

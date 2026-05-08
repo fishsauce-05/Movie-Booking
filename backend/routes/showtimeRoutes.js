@@ -1,9 +1,19 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
-import { getUpcomingShowtimesByMovie, getAvailableSeats, getShowtimeWithMovieInfo } from '../../database/queries/showtimeQueries.js';
+import { getUpcomingShowtimesByMovie, getAvailableSeats, getShowtimeWithMovieInfo, getShowTimeByFilter } from '../../database/queries/showtimeQueries.js';
 
 export default function createShowtimeRoutes(db) {
     const router = express.Router();
+
+    // Lọc suất chiếu theo ngày và khoảng giờ — trả về danh sách movie_id duy nhất
+    router.get('/filter', async (req, res, next) => {
+        try {
+            const { date, start_time, end_time } = req.query;
+
+            const result = await getShowTimeByFilter(db, {date, start_time, end_time});
+            res.json(result);
+        } catch (error) { next(error); }
+    });
 
     router.get('/movie/:movieId', async (req, res, next) => {
         try {

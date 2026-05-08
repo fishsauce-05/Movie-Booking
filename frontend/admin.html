@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin – Cinema Pulse</title>
+    <title>Admin – Fishsauce Cinema</title>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
@@ -13,7 +13,7 @@
         <!-- Sidebar -->
         <nav class="admin-nav">
             <div class="admin-brand">
-                <span class="brand-mark">CP</span>
+                <span class="brand-mark">FS</span>
                 <span>Admin</span>
             </div>
             <ul class="admin-menu">
@@ -23,8 +23,9 @@
                 <li><button type="button" class="menu-btn" data-tab="users">Người dùng</button></li>
                 <li><button type="button" class="menu-btn" data-tab="revenue">Doanh thu</button></li>
                 <li><button type="button" class="menu-btn" data-tab="coupons">Mã giảm giá</button></li>
+                <li><button type="button" class="menu-btn" data-tab="tickets" id="menu-tickets">Tra cứu vé</button></li>
             </ul>
-            <a href="index.html" class="admin-back">← Trang chủ</a>
+            <button type="button" class="admin-back admin-logout-btn" id="admin-logout-btn">Đăng xuất</button>
         </nav>
 
         <!-- Main -->
@@ -70,6 +71,12 @@
             <!-- ── MOVIES ── -->
             <section id="tab-movies" class="tab-content">
                 <div class="tab-toolbar">
+                    <input id="movie-search" type="search" placeholder="Tìm theo tên phim, thể loại..." class="admin-search">
+                    <select id="movie-status-filter" class="admin-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Đang chiếu">Đang chiếu</option>
+                        <option value="Sắp chiếu">Sắp chiếu</option>
+                    </select>
                     <button type="button" class="button button-primary" id="add-movie-btn">+ Thêm phim</button>
                 </div>
 
@@ -113,6 +120,7 @@
             <!-- ── SHOWTIMES ── -->
             <section id="tab-showtimes" class="tab-content">
                 <div class="tab-toolbar">
+                    <input id="showtime-search" type="search" placeholder="Tìm theo tên phim, phòng chiếu..." class="admin-search">
                     <button type="button" class="button button-primary" id="add-showtime-btn">+ Thêm suất chiếu</button>
                 </div>
 
@@ -155,7 +163,7 @@
                         <option value="">Tất cả vai trò</option>
                         <option value="CUSTOMER">Khách hàng</option>
                         <option value="STAFF">Nhân viên</option>
-                        <option value="MANAGER">Quản lý</option>
+                        <option value="ADMIN">Admin</option>
                     </select>
                 </div>
                 <div class="table-wrap">
@@ -169,10 +177,13 @@
             <!-- ── REVENUE ── -->
             <section id="tab-revenue" class="tab-content">
                 <div class="tab-toolbar">
-                    <label class="form-field">Năm
-                        <input id="rev-year" type="number" value="2025" min="2020" max="2099">
-                    </label>
-                    <button type="button" class="button button-primary" id="rev-load-btn">Xem</button>
+                    <div style="display:flex;align-items:flex-end;gap:1rem">
+                        <label class="form-field">Năm
+                            <input id="rev-year" type="number" value="2026" min="2020" max="2099">
+                        </label>
+                        <button type="button" class="button button-primary" id="rev-load-btn">Xem</button>
+                        <button type="button" class="button button-secondary" id="rev-export-btn">In</button>
+                    </div>
                 </div>
                 <div class="stat-grid" id="rev-summary"></div>
                 <div class="table-wrap">
@@ -233,9 +244,58 @@
                     </table>
                 </div>
             </section>
+            <!-- ── TICKETS (STAFF) ── -->
+            <section id="tab-tickets" class="tab-content">
+                <div class="tab-toolbar">
+                    <input id="booking-search" type="search" placeholder="Tìm theo tên KH, phim, mã đặt vé..." class="admin-search">
+                    <select id="booking-status-filter" class="admin-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Hoàn tất">Hoàn tất</option>
+                        <option value="Đã hủy">Đã hủy</option>
+                    </select>
+                </div>
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Mã đặt vé</th>
+                                <th>Khách hàng</th>
+                                <th>Phim</th>
+                                <th>Phòng · Giờ chiếu</th>
+                                <th>Ghế</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="booking-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
         </main>
     </div>
 
+    <div class="admin-modal" id="revenue-export-modal" hidden>
+        <div class="admin-modal-backdrop" data-revenue-export-close></div>
+        <section class="admin-modal-card" role="dialog" aria-modal="true" aria-labelledby="revenue-export-title">
+            <div class="admin-modal-head">
+                <h2 id="revenue-export-title">In thống kê doanh thu</h2>
+                <button type="button" class="admin-modal-close" aria-label="Đóng" data-revenue-export-close>&times;</button>
+            </div>
+            <div class="admin-modal-body">
+                <button type="button" class="report-option" data-revenue-export-type="monthly">
+                    <strong>Thống kê theo tháng</strong>
+                    <span>Xuất doanh thu và số vé của từng tháng trong năm đang chọn.</span>
+                </button>
+                <button type="button" class="report-option" data-revenue-export-type="movies">
+                    <strong>Thống kê doanh thu phim</strong>
+                    <span>Xuất doanh thu, số vé và số hoá đơn theo từng phim.</span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/admin.js"></script>
 </body>

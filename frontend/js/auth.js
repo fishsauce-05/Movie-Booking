@@ -145,7 +145,8 @@ function ensureBookingHistoryModal() {
         <div id="cancel-confirm-modal" class="modal-overlay" hidden>
             <div class="modal-box">
                 <h3>Xác nhận hủy vé</h3>
-                <p style="color:var(--muted);margin:0 0 20px">Bạn có chắc muốn hủy vé này không? Hành động này không thể hoàn tác.</p>
+                <p style="color:var(--muted);margin:0 0 8px">Bạn có chắc muốn hủy vé này không? Hành động này không thể hoàn tác.</p>
+                <p style="color:#e05c3a;margin:0 0 20px;font-size:.875rem">⚠️ Toàn bộ điểm thưởng bạn vừa tích được từ đơn này sẽ bị thu hồi, đồng thời bạn sẽ bị trừ thêm <strong>10 điểm</strong> phạt hủy vé.</p>
                 <div class="modal-actions">
                     <button type="button" class="button button-secondary" onclick="closeModal('cancel-confirm-modal')">Không</button>
                     <button type="button" class="button bh-btn-danger" id="cancel-confirm-btn" onclick="confirmCancelBooking()">Xác nhận hủy</button>
@@ -158,7 +159,7 @@ function ensureBookingHistoryModal() {
                 <h3>Hủy thành công</h3>
                 <p style="color:var(--muted);margin:0 0 20px">Vé của bạn đã được hủy thành công.</p>
                 <div class="modal-actions">
-                    <button type="button" class="button button-primary" onclick="closeModal('cancel-success-modal')">Đóng</button>
+                    <button type="button" class="button button-primary" onclick="closeModal('cancel-success-modal'); location.reload()">Đóng</button>
                 </div>
             </div>
         </div>
@@ -173,8 +174,10 @@ function ensureBookingHistoryModal() {
             closeModal('cancel-confirm-modal');
     });
     document.getElementById('cancel-success-modal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('cancel-success-modal'))
+        if (e.target === document.getElementById('cancel-success-modal')) {
             closeModal('cancel-success-modal');
+            location.reload();
+        }
     });
     document.getElementById('booking-history-modal').querySelector('.modal-close')
         .addEventListener('click', () => closeModal('booking-history-modal'));
@@ -189,7 +192,7 @@ function ensureAuthModals() {
         <div id="login-modal" class="modal-overlay" hidden>
             <div class="modal-box auth-modal-box" role="dialog" aria-modal="true" aria-labelledby="login-title">
                 <button class="modal-close" type="button" aria-label="Đóng">×</button>
-                <span class="modal-kicker">Cinema Pulse</span>
+                <span class="modal-kicker">Fishsauce Cinema</span>
                 <h3 id="login-title">Đăng nhập</h3>
                 <p class="modal-subtitle">Vào tài khoản để đặt vé, áp mã giảm giá và tích điểm thành viên.</p>
                 <form id="login-form" class="admin-form auth-form">
@@ -211,7 +214,7 @@ function ensureAuthModals() {
                 <form id="register-form" class="admin-form auth-form">
                     <label class="form-field">Họ và tên<input name="full_name" required placeholder="Nguyễn Văn A" autocomplete="name"></label>
                     <label class="form-field">Email<input name="email" type="email" required placeholder="you@example.com" autocomplete="email"></label>
-                    <label class="form-field">Số điện thoại<input name="phone" required placeholder="0912345678" autocomplete="tel"></label>
+                    <label class="form-field">Số điện thoại<input name="phone" required placeholder="0123456789" autocomplete="tel"></label>
                     <label class="form-field">Mật khẩu<input name="password" type="password" required minlength="6" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password"></label>
                     <label class="form-field">Xác nhận mật khẩu<input name="confirm_password" type="password" required minlength="6" placeholder="Nhập lại mật khẩu" autocomplete="new-password"></label>
                     <p id="register-msg" class="form-msg"></p>
@@ -233,11 +236,12 @@ function renderAuthNav(user) {
             <div class="auth-info">
                 <span class="auth-points">${user.loyalty_points || 0} điểm</span>
                 <span class="auth-name">${escAuthHtml(user.full_name)}</span>
-                ${user.role === 'MANAGER' || user.role === 'STAFF'
+                ${user.role === 'ADMIN' || user.role === 'STAFF'
                     ? '<a class="button button-secondary auth-btn" href="admin.html">Admin</a>'
                     : ''}
                 ${user.role === 'CUSTOMER'
-                    ? '<button class="button button-secondary auth-btn" id="open-booking-history-btn">Lịch sử đặt vé</button>'
+                    ? `<a class="button button-secondary auth-btn" href="profile.html">Tài khoản</a>
+                       <button class="button button-secondary auth-btn" id="open-booking-history-btn">Lịch sử đặt vé</button>`
                     : ''}
                 <button class="button button-secondary auth-btn" id="logout-btn">Đăng xuất</button>
             </div>
@@ -297,10 +301,13 @@ function wireLoginForm() {
                 return;
             }
             saveUser(data);
+            if (data.role === 'ADMIN' || data.role === 'STAFF') {
+                location.href = 'admin.html';
+                return;
+            }
             closeModal('login-modal');
             renderAuthNav(data);
             msg.textContent = '';
-            // Refresh movie list if on index
             if (typeof fetchMovies === 'function') fetchMovies();
         } catch {
             msg.textContent = 'Lỗi kết nối máy chủ.';

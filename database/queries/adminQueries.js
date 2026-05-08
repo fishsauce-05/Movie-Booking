@@ -38,9 +38,24 @@ async function searchUsers(db, role, q) {
     ];
 
     return db.collection('Users').aggregate([
-        { $match:   match },
+        { $match: match },
         { $project: { password: 0 } },
-        { $sort:    { _id: -1 } }
+        {
+            $addFields: {
+                rolePriority: {
+                    $switch: {
+                        branches: [
+                            { case: { $eq: ['$role', 'ADMIN'] }, then: 0 },
+                            { case: { $eq: ['$role', 'STAFF'] },   then: 1 },
+                            { case: { $eq: ['$role', 'CUSTOMER'] }, then: 2 }
+                        ],
+                        default: 3
+                    }
+                }
+            }
+        },
+        { $sort: { rolePriority: 1, full_name: 1 } },
+        { $project: { rolePriority: 0 } }
     ]).toArray();
 }
 
@@ -102,4 +117,43 @@ async function getAdminCoupons(db) {
     ]).toArray();
 }
 
-export { getAdminShowtimes, searchUsers, getRevenueByMovieFiltered, getAdminCoupons };
+// Tất cả đặt vé kèm thông tin khách hàng + suất chiếu + phim (dành cho STAFF/ADMIN)
+async function getAllBookingsAdmin(db) {
+    return db.collection('Bookings').aggregate([
+        {
+            $lookup: {
+                from:         'Users',
+                localField:   'customer_id',
+                foreignField: '_id',
+                pipeline:     [{ $project: { full_name: 1, email: 1 } }],
+                as:           'customer'
+            }
+        },
+        { $addFields: { customer: { $first: '$customer' } } },
+        {
+            $lookup: {
+                from:         'Showtimes',
+                localField:   'showtime_id',
+                foreignField: '_id',
+                pipeline: [
+                    {
+                        $lookup: {
+                            from:         'Movies',
+                            localField:   'movie_id',
+                            foreignField: '_id',
+                            pipeline:     [{ $project: { title: 1 } }],
+                            as:           'movie'
+                        }
+                    },
+                    { $addFields: { movie: { $first: '$movie' } } },
+                    { $project:   { movie: 1, room_name: 1, start_time: 1 } }
+                ],
+                as: 'showtime'
+            }
+        },
+        { $addFields: { showtime: { $first: '$showtime' } } },
+        { $sort: { created_at: -1 } }
+    ]).toArray();
+}
+
+export { getAdminShowtimes, searchUsers, getRevenueByMovieFiltered, getAdminCoupons, getAllBookingsAdmin };

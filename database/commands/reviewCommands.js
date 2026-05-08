@@ -5,26 +5,11 @@ async function createReview(db, data) {
         movie_id:      new ObjectId(data.movie_id),
         customer_id:   new ObjectId(data.customer_id),
         customer_name: data.customer_name,
-        rating:        data.rating,     // 1-5
+        rating:        data.rating,
         comment:       data.comment,
         created_at:    new Date()
     });
     return result.insertedId;
-}
-
-async function getAllReviews(db) {
-    return db.collection('Reviews').find({}).toArray();
-}
-
-async function getReviewById(db, id) {
-    return db.collection('Reviews').findOne({ _id: new ObjectId(id) });
-}
-
-async function getReviewsByMovie(db, movieId) {
-    return db.collection('Reviews')
-        .find({ movie_id: new ObjectId(movieId) })
-        .sort({ created_at: -1 })
-        .toArray();
 }
 
 async function updateReview(db, id, data) {
@@ -40,4 +25,4 @@ async function deleteReview(db, id) {
     return result.deletedCount;
 }
 
-export { createReview, getAllReviews, getReviewById, getReviewsByMovie, updateReview, deleteReview };
+export { createReview, updateReview, deleteReview };

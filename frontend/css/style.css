@@ -89,7 +89,7 @@ textarea {
 .brand-text strong,
 .hero h1,
 .section-label,
-.toolbar h2,
+.movies-section-header h2,
 .feature-card h3 {
 	letter-spacing: 0.04em;
 }
@@ -101,7 +101,7 @@ textarea {
 
 .brand-text small,
 .hero p,
-.toolbar .field span,
+.filter-panel .field span,
 .movie-meta,
 .feature-card p,
 .movie-availability,
@@ -162,7 +162,7 @@ textarea {
 
 .hero-copy,
 .hero-panel,
-.toolbar,
+.movies-section,
 .feature-card,
 .movie-card,
 .status-box {
@@ -214,7 +214,7 @@ textarea {
 .poster-card,
 .feature-card,
 .movie-card,
-.toolbar,
+.filter-panel,
 .status-box {
 	border: 1px solid var(--line);
 	background: var(--panel);
@@ -309,28 +309,119 @@ textarea {
 	background: linear-gradient(135deg, rgba(94, 234, 212, 0.8), rgba(18, 32, 51, 0.5));
 }
 
-.toolbar {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: end;
-	justify-content: space-between;
-	gap: 18px;
+/* ── Movies Section ──────────────────────────────────────────────────────── */
+.movies-section {
 	margin-top: 14px;
-	padding: 22px;
-	border-radius: 24px;
 }
 
-.toolbar h2 {
-	margin: 10px 0 0;
+.movies-section-header {
+	margin-bottom: 16px;
+	padding: 0 4px;
+}
+
+.movies-section-header h2 {
+	margin: 8px 0 0;
 	font-size: clamp(1.5rem, 2vw, 2.1rem);
 	line-height: 1.25;
 }
 
-.toolbar-filters {
-	display: grid;
-	grid-template-columns: minmax(240px, 380px) 200px;
+.filter-panel {
+	border-radius: 20px;
+	padding: 20px 24px;
+	display: flex;
+	flex-direction: column;
 	gap: 14px;
-	width: min(100%, 600px);
+}
+
+.filter-row {
+	display: flex;
+	gap: 14px;
+	align-items: flex-end;
+}
+
+.filter-row .filter-search {
+	flex: 1 1 auto;
+}
+
+.filter-row .filter-genre {
+	flex: 0 0 200px;
+}
+
+.filter-row-datetime .field {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+.filter-action-btns {
+	display: flex;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.filter-row-stars {
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.filter-label {
+	font-size: .875rem;
+	color: var(--muted);
+	white-space: nowrap;
+}
+
+.star-filter-group {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.star-filter-btn {
+	background: none;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	padding: 6px 12px;
+	cursor: pointer;
+	font-size: .875rem;
+	color: var(--text);
+	transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.star-filter-btn:hover {
+	background: rgba(255, 255, 255, 0.07);
+	border-color: rgba(255, 179, 71, 0.5);
+}
+
+.star-filter-btn.active {
+	background: rgba(255, 179, 71, 0.15);
+	border-color: var(--accent);
+	color: var(--accent);
+	font-weight: 600;
+}
+
+.button-ghost {
+	border: 1px solid var(--line);
+	background: none;
+	color: var(--muted);
+}
+
+.button-ghost:hover {
+	border-color: rgba(255, 255, 255, 0.25);
+	color: var(--text);
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-btn {
+	padding: 14px 20px;
+	border-radius: 16px;
+	white-space: nowrap;
+}
+
+.star-reset-btn {
+	font-size: .8rem;
+	padding: 6px 12px;
+	border-radius: 8px;
 }
 
 .field {
@@ -373,6 +464,49 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 	margin-top: 20px;
 }
 
+.movies-pagination {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+	margin: 28px 0 4px;
+	flex-wrap: wrap;
+}
+
+.page-btn {
+	min-width: 38px;
+	height: 38px;
+	padding: 0 12px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: var(--panel);
+	color: var(--text);
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.page-btn:hover:not(:disabled),
+.page-btn.active {
+	border-color: var(--accent);
+	background: var(--accent);
+	color: #08111f;
+}
+
+.page-btn:disabled {
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+.page-ellipsis {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 28px;
+	height: 38px;
+	color: var(--muted);
+	font-weight: 700;
+}
+
 .movie-card {
 	overflow: hidden;
 	border-radius: 24px;
@@ -413,6 +547,9 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 	margin: 0;
 	font-size: 1.15rem;
 	line-height: 1.35;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .movie-meta,
@@ -495,9 +632,22 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 		grid-template-columns: 1fr;
 	}
 
-	.toolbar-filters {
-		grid-template-columns: 1fr;
+	.filter-row {
+		flex-wrap: wrap;
+	}
+
+	.filter-row .filter-genre {
+		flex: 1 1 auto;
+	}
+
+	.filter-row-datetime .field {
+		flex: 1 1 calc(50% - 7px);
+		min-width: 140px;
+	}
+
+	.filter-action-btns {
 		width: 100%;
+		justify-content: flex-end;
 	}
 
 	.topbar {

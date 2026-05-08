@@ -55,25 +55,59 @@
                 </div>
             </section>
 
-            <section class="toolbar" id="showtimes">
-                <div>
-                    <span class="section-label">Khám phá</span>
+            <section class="movies-section" id="showtimes">
+                <div class="movies-section-header">
+                    <span class="section-label"><a href="movies.html" style="color:inherit;text-decoration:none">Khám phá →</a></span>
                     <h2>Danh sách phim</h2>
                 </div>
-                <div class="toolbar-filters">
-                    <label class="field">
-                        <span>Tìm kiếm</span>
-                        <input id="search-input" type="search" placeholder="Tên phim, thể loại...">
-                    </label>
-                    <label class="field">
-                        <span>Thể loại</span>
-                        <select id="genre-filter"><option value="all">Tất cả</option></select>
-                    </label>
+                <div class="filter-panel">
+                    <!-- Hàng 1: Tìm kiếm + Thể loại -->
+                    <div class="filter-row">
+                        <label class="field filter-search">
+                            <span>Tìm kiếm</span>
+                            <input id="search-input" type="search" placeholder="Tên phim, thể loại...">
+                        </label>
+                        <label class="field filter-genre">
+                            <span>Thể loại</span>
+                            <select id="genre-filter"><option value="all">Tất cả</option></select>
+                        </label>
+                    </div>
+                    <!-- Hàng 2: Ngày & Giờ + Nút hành động -->
+                    <div class="filter-row filter-row-datetime">
+                        <label class="field">
+                            <span>Ngày chiếu</span>
+                            <input id="filter-date" type="date">
+                        </label>
+                        <label class="field">
+                            <span>Giờ bắt đầu</span>
+                            <input id="filter-time-start" type="time">
+                        </label>
+                        <label class="field">
+                            <span>Giờ kết thúc</span>
+                            <input id="filter-time-end" type="time">
+                        </label>
+                        <div class="filter-action-btns">
+                            <button type="button" id="filter-showtime-btn" class="button button-primary filter-btn">Tìm suất chiếu</button>
+                            <button type="button" id="filter-showtime-reset" class="button button-ghost filter-btn" hidden>Xóa lọc</button>
+                        </div>
+                    </div>
+                    <!-- Hàng 3: Lọc theo số sao -->
+                    <div class="filter-row filter-row-stars">
+                        <span class="filter-label">Đánh giá:</span>
+                        <div id="star-filter" class="star-filter-group">
+                            <button type="button" class="star-filter-btn" data-val="1">1★</button>
+                            <button type="button" class="star-filter-btn" data-val="2">2★</button>
+                            <button type="button" class="star-filter-btn" data-val="3">3★</button>
+                            <button type="button" class="star-filter-btn" data-val="4">4★</button>
+                            <button type="button" class="star-filter-btn" data-val="5">5★</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <section class="status-box" id="status-box" hidden></section>
             <section id="movies" class="movie-grid" aria-live="polite"></section>
+            <nav id="index-movies-pagination" class="movies-pagination" aria-label="Chuyển trang phim"></nav>
 
             <!-- Reviews panel (shown when user clicks a movie) -->
             <section id="review-section" class="review-section" hidden>

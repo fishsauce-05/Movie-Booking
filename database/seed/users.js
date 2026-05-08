@@ -20,7 +20,7 @@ const DEFAULT_USERS = [
         password: '12341234',
         full_name: 'User Admin',
         phone: '0900000003',
-        role: 'MANAGER',
+        role: 'ADMIN',
         loyalty_points: 0
     }
 ];

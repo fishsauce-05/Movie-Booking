@@ -14,14 +14,6 @@ async function createMovie(db, data) {
     return result.insertedId;
 }
 
-async function getAllMovies(db) {
-    return db.collection('Movies').find({}).sort({ release_date: -1 }).toArray();
-}
-
-async function getMovieById(db, id) {
-    return db.collection('Movies').findOne({ _id: new ObjectId(id) });
-}
-
 async function updateMovie(db, id, data) {
     const result = await db.collection('Movies').updateOne(
         { _id: new ObjectId(id) },
@@ -35,4 +27,4 @@ async function deleteMovie(db, id) {
     return result.deletedCount;
 }
 
-export { createMovie, getAllMovies, getMovieById, updateMovie, deleteMovie };
+export { createMovie, updateMovie, deleteMovie };

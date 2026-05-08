@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { httpError } from '../validators/index.js';
 
 // Kiểm tra MongoDB có hỗ trợ transaction (replica set) không
 async function isReplicaSet(db) {
@@ -17,13 +18,13 @@ function isStandaloneTransactionError(error) {
 // Validate đầu vào trước khi thực hiện đặt vé
 function validateBookingInput(customerId, showtimeId, seatsToBook) {
     if (!ObjectId.isValid(customerId) || !ObjectId.isValid(showtimeId)) {
-        throw new Error('ID khách hàng hoặc ID suất chiếu không hợp lệ.');
+        throw httpError('ID khách hàng hoặc ID suất chiếu không hợp lệ.', 400);
     }
     if (!Array.isArray(seatsToBook) || seatsToBook.length === 0) {
-        throw new Error('Vui lòng chọn ít nhất một ghế.');
+        throw httpError('Vui lòng chọn ít nhất một ghế.', 400);
     }
     if (new Set(seatsToBook).size !== seatsToBook.length) {
-        throw new Error('Mã ghế bị trùng lặp trong yêu cầu.');
+        throw httpError('Mã ghế bị trùng lặp trong yêu cầu.', 400);
     }
 }
 
@@ -129,35 +130,47 @@ async function handleTicketBooking(db, customerId, showtimeId, seatsToBook, coup
             const [coupon] = await couponsCol.aggregate([
                 {
                     $match: {
-                        code:       couponCode,
-                        status:     'ACTIVE',
-                        start_date: { $lte: now },
-                        end_date:   { $gte: now },
-                        $expr:      { $lt: ['$used_count', '$max_uses'] },
-                            min_order_value: { $lte: subtotalPrice }
+                        code:            couponCode,
+                        status:          'ACTIVE',
+                        start_date:      { $lte: now },
+                        end_date:        { $gte: now },
+                        $expr:           { $lt: ['$used_count', '$max_uses'] },
+                        min_order_value: { $lte: subtotalPrice }
                     }
                 },
                 {
+                    $lookup: {
+                        from:     'CouponUsages',
+                        let:      { couponId: '$_id' },
+                        pipeline: [{ $match: { $expr: { $and: [
+                            { $eq: ['$coupon_id',   '$$couponId'] },
+                            { $eq: ['$customer_id', customerObjId] }
+                        ] } } }],
+                        as: 'usages'
+                    }
+                },
+                { $match: { usages: { $eq: [] } } },
+                {
                     $project: {
-                            code: 1,
-                            discount_type: 1,
-                            discount_value: 1,
+                        code:           1,
+                        discount_type:  1,
+                        discount_value: 1,
                         discountAmount: {
                             $cond: {
                                 if:   { $eq: ['$discount_type', 'PERCENT'] },
-                                    then: { $multiply: [subtotalPrice, { $divide: ['$discount_value', 100] }] },
-                                    else: { $min: ['$discount_value', subtotalPrice] }
+                                then: { $multiply: [subtotalPrice, { $divide: ['$discount_value', 100] }] },
+                                else: { $min: ['$discount_value', subtotalPrice] }
                             }
                         },
                         finalPrice: {
                             $max: [0, {
                                 $subtract: [
-                                        subtotalPrice,
+                                    subtotalPrice,
                                     {
                                         $cond: {
                                             if:   { $eq: ['$discount_type', 'PERCENT'] },
-                                                then: { $multiply: [subtotalPrice, { $divide: ['$discount_value', 100] }] },
-                                                else: { $min: ['$discount_value', subtotalPrice] }
+                                            then: { $multiply: [subtotalPrice, { $divide: ['$discount_value', 100] }] },
+                                            else: { $min: ['$discount_value', subtotalPrice] }
                                         }
                                     }
                                 ]
@@ -167,7 +180,7 @@ async function handleTicketBooking(db, customerId, showtimeId, seatsToBook, coup
                 }
             ], sessionOpt).toArray();
 
-            if (!coupon) throw new Error('Mã giảm giá không hợp lệ, đã hết hạn hoặc đơn hàng chưa đủ điều kiện.');
+            if (!coupon) throw new Error('Mã giảm giá không hợp lệ, đã hết hạn, đơn hàng chưa đủ điều kiện hoặc bạn đã sử dụng mã này rồi.');
             discountAmount  = coupon.discountAmount;
             totalPrice      = coupon.finalPrice;
             appliedCouponId = coupon._id;
@@ -179,7 +192,6 @@ async function handleTicketBooking(db, customerId, showtimeId, seatsToBook, coup
                 discount_amount: coupon.discountAmount
             };
 
-            // Tăng used_count của coupon
             await couponsCol.updateOne(
                 { _id: appliedCouponId },
                 { $inc: { used_count: 1 } },
@@ -192,6 +204,13 @@ async function handleTicketBooking(db, customerId, showtimeId, seatsToBook, coup
             { _id: showtimeInfo.movie_id },
             { projection: { title: 1, poster_url: 1, duration: 1 }, ...sessionOpt }
         );
+
+        // Lấy room_id từ collection Rooms theo room_name
+        const roomDoc = await db.collection('Rooms').findOne(
+            { room_name: showtimeInfo.room_name },
+            { projection: { _id: 1 }, ...sessionOpt }
+        );
+        const roomId = roomDoc?._id || null;
 
         const customerSnapshot = {
             _id: customer._id,
@@ -217,27 +236,38 @@ async function handleTicketBooking(db, customerId, showtimeId, seatsToBook, coup
 
         // Bước 3: Tạo bản ghi đặt vé
         const bookingResult = await bookingsCol.insertOne({
-            customer_id:      customerObjId,
+            customer_id:       customerObjId,
             customer_snapshot: customerSnapshot,
-            showtime_id:      showtimeObjId,
+            showtime_id:       showtimeObjId,
             showtime_snapshot: showtimeSnapshot,
-            movie_id:         showtimeInfo.movie_id,
-            movie_snapshot:   showtimeSnapshot.movie,
-            booked_seats:     seatsToBook,
-            seat_snapshots:   seatSnapshots,
-            subtotal_price:   subtotalPrice,
-            discount_amount:  discountAmount,
-            total_price:      totalPrice,
-            payment_method:   'Chuyển khoản',
-            status:           'Hoàn tất',
-            coupon_code:      couponCode || null,
-            coupon_snapshot:  couponSnapshot,
-            created_at:       new Date(),
-            updated_at:       new Date(),
-            cancelled_at:     null
+            movie_id:          showtimeInfo.movie_id,
+            movie_snapshot:    showtimeSnapshot.movie,
+            room_id:           roomId,
+            booked_seats:      seatsToBook,
+            seat_snapshots:    seatSnapshots,
+            subtotal_price:    subtotalPrice,
+            discount_amount:   discountAmount,
+            total_price:       totalPrice,
+            payment_method:    'Chuyển khoản',
+            status:            'Hoàn tất',
+            coupon_code:       couponCode || null,
+            coupon_snapshot:   couponSnapshot,
+            created_at:        new Date(),
+            updated_at:        new Date(),
+            cancelled_at:      null
         }, sessionOpt);
 
-        // Bước 4: Cập nhật trạng thái ghế → 'Đã được đặt'
+        // Bước 4: Ghi nhận CouponUsage nếu có coupon
+        if (appliedCouponId) {
+            await db.collection('CouponUsages').insertOne({
+                coupon_id:   appliedCouponId,
+                customer_id: customerObjId,
+                booking_id:  bookingResult.insertedId,
+                used_at:     new Date()
+            }, sessionOpt);
+        }
+
+        // Bước 5: Cập nhật trạng thái ghế → 'Đã được đặt'
         await showtimesCol.updateOne(
             { _id: showtimeObjId },
             { $set: { 'seats.$[elem].status': 'Đã được đặt' } },
@@ -249,6 +279,7 @@ async function handleTicketBooking(db, customerId, showtimeId, seatsToBook, coup
 
     // Chạy không có transaction (standalone MongoDB)
     if (!supportsTransactions) {
+        console.warn('[bookingTransaction] MongoDB standalone: chạy không có transaction, không đảm bảo ACID.');
         return runBooking();
     }
 
@@ -268,4 +299,55 @@ async function handleTicketBooking(db, customerId, showtimeId, seatsToBook, coup
     }
 }
 
-export { validateBookingInput, handleTicketBooking };
+async function createBookingForCustomer(db, currentUser, { customerId, showtimeId, seatsToBook, couponCode }) {
+    if (String(currentUser._id) !== String(customerId)) {
+        throw httpError('Bạn chỉ có thể đặt vé cho tài khoản của chính mình.', 403);
+    }
+
+    validateBookingInput(customerId, showtimeId, seatsToBook);
+    return handleTicketBooking(db, customerId, showtimeId, seatsToBook, couponCode || null);
+}
+
+async function cancelBooking(db, currentUser, bookingId) {
+    if (!ObjectId.isValid(bookingId)) {
+        throw httpError('ID đặt vé không hợp lệ.', 400);
+    }
+
+    const booking = await db.collection('Bookings').findOne({ _id: new ObjectId(bookingId) });
+    if (!booking) {
+        throw httpError('Không tìm thấy đặt vé.', 404);
+    }
+
+    if (String(booking.customer_id) !== String(currentUser._id)) {
+        throw httpError('Bạn không có quyền hủy vé này.', 403);
+    }
+
+    if (booking.status !== 'Hoàn tất') {
+        throw httpError('Chỉ có thể hủy vé có trạng thái "Hoàn tất".', 400);
+    }
+
+    await db.collection('Bookings').updateOne(
+        { _id: new ObjectId(bookingId) },
+        { $set: { status: 'Đã hủy', updated_at: new Date(), cancelled_at: new Date() } }
+    );
+
+    await db.collection('Showtimes').updateOne(
+        { _id: booking.showtime_id },
+        { $set: { 'seats.$[elem].status': 'Trống' } },
+        { arrayFilters: [{ 'elem.seat_code': { $in: booking.booked_seats } }] }
+    );
+
+    // Change stream handles point deduction on replica set; standalone runs fallback here.
+    const supportsChangeStreams = await isReplicaSet(db);
+    if (!supportsChangeStreams) {
+        const earnedPoints = Math.floor((booking.subtotal_price || 0) / 10000);
+        await db.collection('Users').updateOne(
+            { _id: booking.customer_id },
+            [{ $set: { loyalty_points: { $max: [0, { $subtract: ['$loyalty_points', earnedPoints + 10] }] } } }]
+        );
+    }
+
+    return { message: 'Hủy vé thành công.' };
+}
+
+export { validateBookingInput, handleTicketBooking, createBookingForCustomer, cancelBooking };
